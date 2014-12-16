@@ -1,0 +1,75 @@
+#!CONFIG_BASH_COMMAND
+
+# Copyright 2014 Georgia Tech Research Corporation (GTRC). All rights reserved.
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#HELP:COMMAND_NAME: Update supporting files for packages
+
+. "CONFIG_PREFIX"/lib/bash/common.bash
+. "CONFIG_PREFIX"/lib/bash/opt_help.bash
+. "CONFIG_PREFIX"/lib/bash/opt_verbose.bash
+
+#HELP:Options:
+#HELP:  --help | -h: Print this help
+#HELP:  --verbose | -v: Print debug info
+
+#HELP:  -f | --force: Update all helpers, even if they're not currently present
+unset force
+opt_force () {
+    force=true
+}
+
+OPTIND=1
+while getopts :fhv-: option
+do case "$option" in
+       f ) opt_force;;
+       h ) opt_help;;
+       v ) opt_verbose;;
+       - ) case "$OPTARG" in
+               force ) opt_force;;
+               help ) opt_help;;
+               verbose ) opt_verbose;;
+               force=* | help=* | verbose=* )
+                   printf "No argument expected for long option \"%s\"\n" "${OPTARG%%=*}" >&2
+                   exit 1;;
+               * ) printf "Unknown long option \"%s\"\n" "${OPTARG%%=*}" >&2
+                   exit 1;;
+            esac;;
+        '?' ) printf "Unknown short option \"%s\"\n" "$OPTARG" >&2
+              exit 1;;
+        : ) printf "Short option \"%s\" missing argument" "$OPTARG" >&2
+            exit 1;;
+        * ) printf "Bad state in getopts (OPTARG=\"%s\")\n" "$OPTARG" >&2
+            exit 1;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ is-set = ${force:+is-set} || -f configure-helper.bash ]]
+then
+  vecho "updating configure-helper.bash"
+  'CONFIG_RM_COMMAND' -f configure-helper.bash
+  'CONFIG_CAT_COMMAND' 'CONFIG_SHARE_DIR'/configure-helper.bash > configure-helper.bash
+  'CONFIG_CHMOD_COMMAND' uog-w configure-helper.bash
+else vecho "skipping configure-helper.bash"
+fi
+
+m4_dnl Local Variables:
+m4_dnl mode: shell-script
+m4_dnl eval: (sh-set-shell "bash")
+m4_dnl indent-tabs-mode: nil
+m4_dnl fill-column: 9999
+m4_dnl End:
+

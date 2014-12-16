@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# Copyright 2014 Georgia Tech Research Corporation (GTRC). All rights reserved.
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+cd "$(dirname "$0")"
+
+. ./configure-helper.bash
+
+config_decl_set_package_name wrtools-core
+
+OPTIND=1
+while getopts :hp:-: option
+do case "$option" in
+       h ) opt_help;;
+       p ) opt_prefix "$OPTARG";;
+       - ) case "$OPTARG" in
+               help ) opt_help;;
+               prefix=* ) opt_prefix "${OPTARG#*=}";;
+               help=* )
+                   fail "No argument expected for long option \"${OPTARG%%=*}\"\n";;
+               prefix ) fail "Argument expected for long option \"$OPTARG\"\n";;
+               * ) fail "Unknown long option \"$OPTARG\"\n";;
+           esac;;
+       '?' ) fail "Unknown short option \"$OPTARG\"\n";;
+       : ) fail "Short option \"$OPTARG\" missing argument";;
+       * ) fail "Bad state in getopts (OPTARG=\"$OPTARG\")\n";;
+   esac
+done
+shift $((OPTIND-1))
+
+[[ is-set = ${config_prefix:+is-set} ]] || fail "option --prefix is required"
+config_set_shared
+
+config_decl_set_command CONFIG_BASH_COMMAND bash
+config_decl_set_command CONFIG_BASENAME_COMMAND gbasename basename
+config_decl_set_command CONFIG_CAT_COMMAND gcat cat
+config_decl_set_command CONFIG_CHMOD_COMMAND gchmod chmod
+config_decl_set_command CONFIG_CP_COMMAND gcp cp
+config_decl_set_command CONFIG_DIRNAME_COMMAND gdirname dirname
+config_decl_set_command CONFIG_FIND_COMMAND find
+config_decl_set_command CONFIG_FIND_COMMAND gfind find
+config_decl_set_command CONFIG_GREP_COMMAND grep
+config_decl_set_command CONFIG_M4_COMMAND gm4 m4
+config_decl_set_command CONFIG_MKDIR_COMMAND gmkdir mkdir
+config_decl_set_command CONFIG_MKTEMP_COMMAND gmkdir mkdir
+config_decl_set_command CONFIG_REALPATH_COMMAND grealpath realpath
+config_decl_set_command CONFIG_RM_COMMAND grm rm
+config_decl_set_command CONFIG_SED_COMMAND gsed sed
+config_decl_set_command CONFIG_STOW_COMMAND stow
+
+config_decl_set CONFIG_PRODUCTS "Makefile reconfigure $config_decls_m4"
+
+# reconfigure
+cat <<EOF > reconfigure
+exec ./configure --prefix="$config_prefix"
+EOF
+chmod 755 ./reconfigure
+
+# Makefile
+rm -f Makefile
+m4 -P "$config_decls_m4" Makefile.in > Makefile
+! grep 'CONFIG_' Makefile || fail "Makefile.in used bad macro"
+chmod uog-w Makefile
+
+# Local Variables:
+# mode: shell-script
+# eval: (sh-set-shell "bash")
+# indent-tabs-mode: nil
+# fill-column: 9999
+# End:

@@ -1,0 +1,7 @@
+Makefile
+config-decls.m4
+reconfigure
+*~
+tmp
+\#*\#
+.\#*

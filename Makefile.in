@@ -1,0 +1,61 @@
+# Copyright 2014 Georgia Tech Research Corporation (GTRC). All rights reserved.
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+SHELL = CONFIG_BASH_COMMAND
+
+src_files = $(shell CONFIG_FIND_COMMAND src -type f ! -name '*~' ! -name '\#*\#' -print)
+
+build_dir = tmp/build
+build_files = $(src_files:src/%=$(build_dir)/%) \
+	$(build_dir)/share/CONFIG_PACKAGE_NAME/configure-helper.bash
+
+.PHONY: default build clean install
+
+default: build
+
+build: $(build_files)
+
+$(build_dir)/%: src/% CONFIG_DECLS_M4
+	CONFIG_RM_COMMAND -f $@
+	CONFIG_MKDIR_COMMAND -p $(dir $@)
+	CONFIG_M4_COMMAND -P CONFIG_DECLS_M4 $< > $@
+	! CONFIG_GREP_COMMAND 'CONFIG''_' $@
+	CONFIG_CHMOD_COMMAND --reference=$< $@
+	CONFIG_CHMOD_COMMAND uog-w $@
+
+$(build_dir)/share/CONFIG_PACKAGE_NAME/configure-helper.bash: configure-helper.bash
+	CONFIG_RM_COMMAND -f $@
+	CONFIG_MKDIR_COMMAND -p $(dir $@)
+	CONFIG_CP_COMMAND $< $@
+	CONFIG_CHMOD_COMMAND --reference=$< $@
+	CONFIG_CHMOD_COMMAND uog-w $@
+
+clean:
+	CONFIG_RM_COMMAND -rf $(build_dir)
+
+uninstall:
+	- 'CONFIG_STOW_COMMAND' -d 'CONFIG_STOW_PACKAGES_DIR' -t 'CONFIG_PREFIX' --delete --verbose --no-folding 'CONFIG_PACKAGE_NAME'
+	CONFIG_RM_COMMAND -rf 'CONFIG_STOW_PACKAGE_DIR'
+
+install: uninstall build
+	rsync --archive --delete $(build_dir)/ 'CONFIG_STOW_PACKAGE_DIR/'
+	'CONFIG_STOW_COMMAND' -d 'CONFIG_STOW_PACKAGES_DIR' -t 'CONFIG_PREFIX' --stow --verbose --no-folding 'CONFIG_PACKAGE_NAME'
+
+CONFIG_STOW_PACKAGE_DIR/%: $(build_dir)/%
+	CONFIG_RM_COMMAND -f $@
+	CONFIG_MKDIR_COMMAND -p $(dir $@)
+	CONFIG_CP_COMMAND $< $@
+	CONFIG_CHMOD_COMMAND --reference=$< $@
+
