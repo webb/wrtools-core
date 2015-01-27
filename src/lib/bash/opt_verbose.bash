@@ -13,7 +13,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if test is-set != "${WRTOOLS_LOADED_OPT_VERBOSE_BASH:+is-set}"
+# recommended help:
+#HELP:  --verbose, -v: Print additional diagnostics
+
+# getopts pieces:
+#while getopts :v-: option
+#       v ) opt_verbose;;
+#       - ) case "$OPTARG" in
+#               verbose ) opt_verbose;;
+#               verbose=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+
+
+if test is-set != "${WRTOOLS_LOADED_OPT_VERBOSE_BASH+is-set}"
 then
   WRTOOLS_LOADED_OPT_VERBOSE_BASH=true
 
@@ -30,7 +41,7 @@ then
   }
 
   is_verbose () {
-      [[ is-set = ${WRTOOLS_VERBOSE:+is-set} ]]
+      [[ is-set = ${WRTOOLS_VERBOSE+is-set} ]]
   }
 
   vecho () {
