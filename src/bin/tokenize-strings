@@ -1,7 +1,7 @@
 #!CONFIG_BASH_COMMAND
 
-#HELP:COMMAND_NAME: convert a set of strings into tokenized values, one per line
-#HELP:Usage: COMMAND_NAME $string1 $string2 ...
+#HELP:CONFIG_SUBJECT_NAME: convert a set of strings into tokenized values, one per line
+#HELP:Usage: CONFIG_SUBJECT_NAME $string1 $string2 ...
 
 . 'CONFIG_BASH_DIR'/common.bash
 . 'CONFIG_BASH_DIR'/opt_help.bash
