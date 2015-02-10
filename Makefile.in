@@ -1,4 +1,5 @@
-# Copyright 2014 Georgia Tech Research Corporation (GTRC). All rights reserved.
+
+# Copyright 2014-2015 Georgia Tech Research Corporation (GTRC). All rights reserved.
 
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -13,49 +14,84 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SHELL = CONFIG_BASH_COMMAND
+SHELL = @bash@
 
-src_files = $(shell CONFIG_FIND_COMMAND src -type f ! -name '*~' ! -name '\#*\#' -print)
+PACKAGE_NAME = @PACKAGE_NAME@
+prefix = @prefix@
+datarootdir = @datarootdir@
+datadir = @datadir@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
 
-build_dir = tmp/build
-build_files = $(src_files:src/%=$(build_dir)/%) \
-	$(build_dir)/share/CONFIG_PACKAGE_NAME/configure-helper.bash
+bash_dir = $(datadir)/bash
 
-.PHONY: default build clean install
+GREP = @GREP@
+INSTALL = @INSTALL@
+MKDIR_P = @MKDIR_P@
+SED = @SED@
 
-default: build
+basename = @basename@
+bash = @bash@
+dirname = @dirname@
+find = @find@
+m4 = @m4@
+mktemp = @mktemp@
+rm = @rm@
 
-build: $(build_files)
+RM = $(rm) -f
 
-$(build_dir)/%: src/% CONFIG_DECLS_M4
-	CONFIG_RM_COMMAND -f $@
-	CONFIG_MKDIR_COMMAND -p $(dir $@)
-	CONFIG_M4_COMMAND -P CONFIG_DECLS_M4 $< > $@
-	! CONFIG_GREP_COMMAND 'CONFIG''_' $@
-	CONFIG_CHMOD_COMMAND --reference=$< $@
-	CONFIG_CHMOD_COMMAND uog-w $@
+standard_macros = \
+	-DCONFIG_BASH_COMMAND=$(bash) \
+	-DCONFIG_BASH_DIR=$(bash_dir) \
+	-DCONFIG_SED_COMMAND=$(SED) \
+	-DCONFIG_M4_COMMAND=$(m4) \
+	-DCONFIG_MKTEMP_COMMAND=$(mktemp) \
+	-DCONFIG_BASENAME_COMMAND=$(basename) \
+	-DCONFIG_DIRNAME_COMMAND=$(dirname) \
 
-$(build_dir)/share/CONFIG_PACKAGE_NAME/configure-helper.bash: configure-helper.bash
-	CONFIG_RM_COMMAND -f $@
-	CONFIG_MKDIR_COMMAND -p $(dir $@)
-	CONFIG_CP_COMMAND $< $@
-	CONFIG_CHMOD_COMMAND --reference=$< $@
-	CONFIG_CHMOD_COMMAND uog-w $@
+src_bin_files = $(shell $(find) src/bin -type f ! -name '*~' ! -name '\#*\#' -print)
+src_bash_files = $(shell $(find) src/bash -type f ! -name '*~' ! -name '\#*\#' -print)
+
+out_files = $(src_bin_files:src/bin/%=out/bin/%) $(src_bash_files:src/bash/%=out/bash/%)
+
+install_files = $(src_bin_files:src/bin/%=$(bindir)/%) $(src_bash_files:src/bash/%=$(bash_dir)/%)
+
+.PHONY: all clean distclean install uninstall
+
+all: $(out_files)
+
+out/bin/%: src/bin/% src/macros.m4
+	$(MKDIR_P) $(dir $@)
+	$(m4) -P $(standard_macros) \
+		-DCONFIG_SUBJECT_PATH=$(@:out/bin/%=$(bindir)/%) \
+		-DCONFIG_SUBJECT_NAME=$(notdir $@) \
+		src/macros.m4 $< > $@
+	@ ! $(GREP) 'CONFIG''_' $@
+
+out/bash/%: src/bash/% src/macros.m4
+	$(MKDIR_P) $(dir $@)
+	$(m4) -P $(standard_macros) \
+		-DCONFIG_SUBJECT_PATH=$(@:out/bash/%=$(bash_dir)/%) \
+		-DCONFIG_SUBJECT_NAME=$(notdir $@) \
+		src/macros.m4 $< > $@
+	@ ! $(GREP) 'CONFIG''_' $@
 
 clean:
-	CONFIG_RM_COMMAND -rf $(build_dir)
+	$(RM) -r out
+	$(RM) $(wildcard *~)
+
+distclean: clean
+	$(RM) -r autom4te.cache
+	$(RM) Makefile config.log config.status stow.mk
+
+install: $(install_files)
+
+$(bindir)/%: out/bin/%
+	$(INSTALL) -D -m 755 $< $@
+
+$(bash_dir)/%: out/bash/%
+	$(INSTALL) -D -m 644 $< $@
 
 uninstall:
-	- 'CONFIG_STOW_COMMAND' -d 'CONFIG_STOW_PACKAGES_DIR' -t 'CONFIG_PREFIX' --delete --verbose --no-folding 'CONFIG_PACKAGE_NAME'
-	CONFIG_RM_COMMAND -rf 'CONFIG_STOW_PACKAGE_DIR'
-
-install: uninstall build
-	rsync --archive --delete $(build_dir)/ 'CONFIG_STOW_PACKAGE_DIR/'
-	'CONFIG_STOW_COMMAND' -d 'CONFIG_STOW_PACKAGES_DIR' -t 'CONFIG_PREFIX' --stow --verbose --no-folding 'CONFIG_PACKAGE_NAME'
-
-CONFIG_STOW_PACKAGE_DIR/%: $(build_dir)/%
-	CONFIG_RM_COMMAND -f $@
-	CONFIG_MKDIR_COMMAND -p $(dir $@)
-	CONFIG_CP_COMMAND $< $@
-	CONFIG_CHMOD_COMMAND --reference=$< $@
+	$(RM) $(install_files)
 

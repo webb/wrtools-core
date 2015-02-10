@@ -17,7 +17,7 @@ if test is-set != "${WRTOOLS_LOADED_OPT_HELP_BASH:+is-set}"
 then
   WRTOOLS_LOADED_OPT_HELP_BASH=true
 
-  . CONFIG_PREFIX/lib/bash/command-path.bash
+  . CONFIG_BASH_DIR/command-path.bash
 
   # Use command line help:
   #    #HELP:  --help | -h: Print this help

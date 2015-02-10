@@ -17,10 +17,10 @@
 
 #HELP:COMMAND_NAME: Join arguments together as one big string
 
-. "CONFIG_PREFIX"/lib/bash/common.bash
-. "CONFIG_PREFIX"/lib/bash/opt_help.bash
-. "CONFIG_PREFIX"/lib/bash/opt_verbose.bash
-. "CONFIG_PREFIX"/lib/bash/fail.bash
+. 'CONFIG_BASH_DIR'/common.bash
+. 'CONFIG_BASH_DIR'/opt_help.bash
+. 'CONFIG_BASH_DIR'/opt_verbose.bash
+. 'CONFIG_BASH_DIR'/fail.bash
 
 #HELP:Options:
 #HELP:  --help | -h: Print this help

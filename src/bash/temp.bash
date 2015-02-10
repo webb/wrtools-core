@@ -17,8 +17,8 @@ if [[ is-set != "${WRTOOLS_LOADED_LIB_BASH_TEMP_BASH:+is-set}" ]]
 then
   WRTOOLS_LOADED_LIB_BASH_TEMP_BASH=true
 
-  . 'CONFIG_PREFIX'/lib/bash/opt_verbose.bash
-  . 'CONFIG_PREFIX'/lib/bash/exit_hook.bash
+  . 'CONFIG_BASH_DIR'/lib/bash/opt_verbose.bash
+  . 'CONFIG_BASH_DIR'/lib/bash/exit_hook.bash
 
   if [[ is-set != "${WRTOOLS_TEMP_DIR+is-set}" ]]
   then

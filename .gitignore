@@ -1,7 +1,9 @@
-Makefile
-config-decls.m4
-reconfigure
 *~
-tmp
-\#*\#
 .\#*
+Makefile
+\#*\#
+autom4te.cache
+config.log
+config.status
+out
+stow.mk

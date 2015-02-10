@@ -32,8 +32,8 @@ then
   # Pipelines are asynchronous, and verbosity / debugging output can
   # overlap in strange, sometimes painfully unfortunate ways.
 
-  . "CONFIG_PREFIX"/lib/bash/common.bash
-  . "CONFIG_PREFIX"/lib/bash/command-path.bash
+  . "CONFIG_BASH_DIR"/common.bash
+  . "CONFIG_BASH_DIR"/command-path.bash
 
   unset WRTOOLS_VERBOSE
   opt_verbose () {

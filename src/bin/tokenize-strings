@@ -1,0 +1,66 @@
+#!CONFIG_BASH_COMMAND
+
+#HELP:COMMAND_NAME: convert a set of strings into tokenized values, one per line
+#HELP:Usage: COMMAND_NAME $string1 $string2 ...
+
+. 'CONFIG_BASH_DIR'/common.bash
+. 'CONFIG_BASH_DIR'/opt_help.bash
+. 'CONFIG_BASH_DIR'/opt_verbose.bash
+. 'CONFIG_BASH_DIR'/fail.bash
+
+#HELP:Options:
+#HELP:  --help | -h: Print this help
+
+#HELP:  --input-separator=$char | -i $char: tokenize input as separated by $char
+#HELP:      default is ":"
+input_separator_char=:
+opt_input_separator () {
+    (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
+    (( ${#1} == 1 )) || fail "input separator must be a single character (got ${#1})"
+    input_separator_char="$1"
+}
+
+#HELP:  --output-separator=$string | -o $string: on output, separate tokens by $string
+#HELP:      default is newline. Use $'\0' for null-separated output.
+output_separator_char=$'\n'
+opt_output_separator () {
+    (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
+    output_separator_char="$1"
+}
+
+OPTIND=1
+while getopts :hi:o:-: option
+do case "$option" in
+       h ) opt_help;;
+       i ) opt_input_separator "$OPTARG";;
+       o ) opt_output_separator "$OPTARG";;
+       - ) case "$OPTARG" in
+               help ) opt_help;;
+               input-separator=* ) opt_input_separator "${OPTARG#*=}";;
+               output-separator=* ) opt_output_separator "${OPTARG#*=}";;
+               input-separator | output-separator ) fail "Argument required for long option \"$OPTARG\"";;
+               help=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+               * ) fail "Unknown long option \"${OPTARG%%=*}\"";;
+            esac;;
+        '?' ) fail "Unknown short option \"$OPTARG\"";;
+        : ) fail "Short option \"$OPTARG\" missing argument";;
+        * ) fail_assert "Bad state in getopts (OPTARG=\"$OPTARG\")";;
+   esac
+done
+shift $((OPTIND-1))
+
+current_output_separator=""
+for string in "$@"
+do
+    while read -r -d "$input_separator_char"
+    do printf "%s%s" "$current_output_separator" "$REPLY"
+       current_output_separator=$output_separator_char
+    done <<< "$string$input_separator_char"
+done
+
+m4_dnl Local Variables:
+m4_dnl mode: shell-script
+m4_dnl eval: (sh-set-shell "bash")
+m4_dnl indent-tabs-mode: nil
+m4_dnl fill-column: 9999
+m4_dnl End:

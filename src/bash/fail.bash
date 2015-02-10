@@ -17,7 +17,7 @@ if [[ is-set != ${WRTOOLS_LOADED_LIB_BASH_FAIL_BASH:+is-set} ]]
 then
   WRTOOLS_LOADED_LIB_BASH_FAIL_BASH=true
 
-  . CONFIG_PREFIX/lib/bash/command-path.bash
+  . CONFIG_BASH_DIR/command-path.bash
   
   # use fail for user-facing stuff
   # use fail_assert for errors that are not user-facing. Provides more detail
