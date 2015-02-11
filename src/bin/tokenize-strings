@@ -12,20 +12,24 @@
 #HELP:  --help | -h: Print this help
 
 #HELP:  --input-separator=$char | -i $char: tokenize input as separated by $char
-#HELP:      default is ":"
-input_separator_char=:
+#HELP:      Default is blank (''), which does not tokenize input
+default_input_separator=''
+unset input_separator
 opt_input_separator () {
+    [[ ${input_separator+is-set} != is-set ]] || fail "option --input-separator may only occur once" 
     (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
-    (( ${#1} == 1 )) || fail "input separator must be a single character (got ${#1})"
-    input_separator_char="$1"
+    (( ${#1} <= 1 )) || fail "input separator must be a empty or a single character (got ${#1})"
+    input_separator="$1"
 }
 
 #HELP:  --output-separator=$string | -o $string: on output, separate tokens by $string
-#HELP:      default is newline. Use $'\0' for null-separated output.
-output_separator_char=$'\n'
+#HELP:      Default is newline. Use blank ('') for null-separated output. Use : for PATHs
+default_output_separator=$'\n'
+unset output_separator
 opt_output_separator () {
+    [[ ${output_separator+is-set} != is-set ]] || fail "option --output-separator may only occur once" 
     (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
-    output_separator_char="$1"
+    output_separator="$1"
 }
 
 OPTIND=1
@@ -49,13 +53,37 @@ do case "$option" in
 done
 shift $((OPTIND-1))
 
-current_output_separator=""
+if [[ ${input_separator+is-set} != is-set ]]
+then vecho Using default input separator
+     input_separator=$default_input_separator
+fi
+
+if [[ ${output_separator+is-set} != is-set ]]
+then vecho Using default output separator
+     output_separator=$default_output_separator
+fi
+
+has_printed=false
+print_separated () {
+    (( $# == 1 )) || fail "$FUNCNAME must have 1 arg"
+    if [[ $has_printed = true ]]
+    then if [[ $output_separator = '' ]]
+         then printf '\0'
+         else printf "%s" "$output_separator"
+         fi
+    fi
+    printf "%s" "$1"
+    has_printed=true
+}
+
 for string in "$@"
 do
-    while read -r -d "$input_separator_char"
-    do printf "%s%s" "$current_output_separator" "$REPLY"
-       current_output_separator=$output_separator_char
-    done <<< "$string$input_separator_char"
+    if [[ $input_separator = "" ]]
+    then print_separated "$string"
+    else while read -r -d "$input_separator"
+         do print_separated "$REPLY"
+         done <<< "$string$input_separator"
+    fi
 done
 
 m4_dnl Local Variables:
