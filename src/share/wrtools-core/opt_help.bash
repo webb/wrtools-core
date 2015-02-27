@@ -13,11 +13,20 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [[ is-set != ${WRTOOLS_LOADED_LIB_BASH_COMMON_BASH:+is-set} ]]
+if test is-set != "${WRTOOLS_LOADED_OPT_HELP_BASH:+is-set}"
 then
-  WRTOOLS_LOADED_LIB_BASH_COMMON_BASH=true
+  WRTOOLS_LOADED_OPT_HELP_BASH=true
 
-  set -o nounset -o errexit
-  unset CDPATH
-      
+  . "$(dirname "$BASH_SOURCE")"/command-path.bash
+  . "$(dirname "$BASH_SOURCE")"/fail.bash
+
+  # Use command line help:
+  #    #HELP:  --help | -h: Print this help
+  # macro COMMAND_NAME will substitute for the short name of the command
+  opt_help () {
+      (( $# == 0 )) || fail "function $FUNCNAME must have 0 arguments (got $#)"
+      sed -e "s/.*#""HELP://p;d" "$(get_command_path_abs)" | m4 -P -DCOMMAND_NAME="$(get_command_path_short)"
+      exit 0
+  }
 fi
+

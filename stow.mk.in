@@ -17,6 +17,7 @@
 SHELL = @bash@
 
 PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
 prefix = @prefix@
 
 stow = @stow@
@@ -24,17 +25,25 @@ stow = @stow@
 .PHONY: default unstow uninstall install stow rm
 default: unstow uninstall install stow
 
+help:
+	default: unstow uninstall install stow
+	rm: unstow uninstall
+	unstow
+	uninstall
+	install
+	stow
+
 rm: unstow uninstall
 
 unstow:
-	- $(stow) -d $(prefix)/stow -t $(prefix) --delete --verbose --no-folding $(PACKAGE_NAME)
+	- $(stow) -d $(prefix)/stow -t $(prefix) --delete --verbose --no-folding $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 uninstall:
-	$(RM) -r $(prefix)/stow/$(PACKAGE_NAME)
+	$(RM) -r $(prefix)/stow/$(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 install:
-	$(MAKE) install prefix=$(prefix)/stow/$(PACKAGE_NAME)
+	$(MAKE) install prefix=$(prefix)/stow/$(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 stow:
-	$(stow) -d $(prefix)/stow -t $(prefix) --stow --verbose --no-folding $(PACKAGE_NAME)
+	$(stow) -d $(prefix)/stow -t $(prefix) --stow --verbose --no-folding $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 

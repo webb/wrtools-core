@@ -1,12 +1,13 @@
-#!CONFIG_BASH_COMMAND
+#!/bin/bash
 
-#HELP:CONFIG_SUBJECT_NAME: convert a set of strings into tokenized values, one per line
-#HELP:Usage: CONFIG_SUBJECT_NAME $string1 $string2 ...
+#HELP:COMMAND_NAME: convert a set of strings into tokenized values, one per line
+#HELP:Usage: COMMAND_NAME $string1 $string2 ...
 
-. 'CONFIG_BASH_DIR'/common.bash
-. 'CONFIG_BASH_DIR'/opt_help.bash
-. 'CONFIG_BASH_DIR'/opt_verbose.bash
-. 'CONFIG_BASH_DIR'/fail.bash
+root_dir=$(dirname "$0")/..
+. "$root_dir"/share/wrtools-core/script.bash
+. "$root_dir"/share/wrtools-core/opt_help.bash
+. "$root_dir"/share/wrtools-core/opt_verbose.bash
+. "$root_dir"/share/wrtools-core/fail.bash
 
 #HELP:Options:
 #HELP:  --help | -h: Print this help
@@ -86,9 +87,9 @@ do
     fi
 done
 
-m4_dnl Local Variables:
-m4_dnl mode: shell-script
-m4_dnl eval: (sh-set-shell "bash")
-m4_dnl indent-tabs-mode: nil
-m4_dnl fill-column: 9999
-m4_dnl End:
+# Local Variables:
+# mode: shell-script
+# eval: (sh-set-shell "bash")
+# indent-tabs-mode: nil
+# fill-column: 9999
+# End:

@@ -17,8 +17,8 @@ if [[ is-set != "${WRTOOLS_LOADED_LIB_BASH_TEMP_BASH:+is-set}" ]]
 then
   WRTOOLS_LOADED_LIB_BASH_TEMP_BASH=true
 
-  . 'CONFIG_BASH_DIR'/lib/bash/opt_verbose.bash
-  . 'CONFIG_BASH_DIR'/lib/bash/exit_hook.bash
+  . "$(dirname "$BASH_SOURCE")"/opt_verbose.bash
+  . "$(dirname "$BASH_SOURCE")"/exit_hook.bash
 
   if [[ is-set != "${WRTOOLS_TEMP_DIR+is-set}" ]]
   then
@@ -61,7 +61,7 @@ then
       local VAR
       for VAR in "$@"
       do
-          local PATHNAME="$(umask 077; 'CONFIG_MKTEMP_COMMAND' -d "$WRTOOLS_TEMP_DIR"/"$VAR".XXXXXX)"
+          local PATHNAME="$(umask 077; mktemp -d "$WRTOOLS_TEMP_DIR"/"$VAR".XXXXXX)"
           eval "$VAR"="$PATHNAME"
           # Append here; don't reset it, since this may be called multiple times.
           WRTOOLS_TEMP_DIR_VARS+=("$VAR")

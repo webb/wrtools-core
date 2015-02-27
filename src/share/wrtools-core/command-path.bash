@@ -19,10 +19,13 @@ then
 
   # Don't reference these. Use the functions instead.
   # We can optimize this out later if needed
-  WRTOOLS_COMMAND_PATH_BASH_SHORT_VALUE=$('CONFIG_BASENAME_COMMAND' "$0")
-  WRTOOLS_COMMAND_PATH_BASH_ABS_VALUE=$(cd "$('CONFIG_DIRNAME_COMMAND' "$0")"; pwd)/$WRTOOLS_COMMAND_PATH_BASH_SHORT_VALUE
+  WRTOOLS_COMMAND_PATH_BASH_SHORT_VALUE=$(basename "$0")
 
+  WRTOOLS_COMMAND_PATH_BASH_ABS_VALUE=$(cd "$(dirname "$0")"; pwd)/$WRTOOLS_COMMAND_PATH_BASH_SHORT_VALUE
   get_command_path_abs () {
+      if [[ is-set != ${WRTOOLS_COMMAND_PATH_BASH_ABS_VALUE+is-set} ]]
+      then WRTOOLS_COMMAND_PATH_BASH_ABS_VALUE=$(cd "$(dirname "$0")"; pwd)/$WRTOOLS_COMMAND_PATH_BASH_SHORT_VALUE
+      fi
       printf "%s" "$WRTOOLS_COMMAND_PATH_BASH_ABS_VALUE"
   }
 
