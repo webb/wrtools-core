@@ -27,6 +27,7 @@ root_dir=$(dirname "$0")/..
 
 #HELP:Options:
 #HELP:  --help | -h: Print this help
+#HELP:  --verbose, -v: Print additional diagnostics
 
 #HELP:  --input-separator=$char | -i $char: tokenize input as separated by $char
 #HELP:      Default is blank (''), which does not tokenize input
@@ -40,27 +41,43 @@ opt_input_separator () {
 }
 
 #HELP:  --output-separator=$string | -o $string: on output, separate tokens by $string
-#HELP:      Default is newline. Use blank ('') for null-separated output. Use : for PATHs
+#HELP:      Default is newline. Use ':' for PATHs
 default_output_separator=$'\n'
 unset output_separator
 opt_output_separator () {
-    [[ ${output_separator+is-set} != is-set ]] || fail "option --output-separator may only occur once" 
+    [[ ${output_separator+is-set} != is-set ]] || fail "option --output-separator may be used only once" 
+    [[ $output_null = false ]] || fail "Only one of options --output-null and --input-separator may be used."
     (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
     output_separator="$1"
 }
 
+#HELP:  --output-null | -0: on output, separate tokens by NULL (\0)
+output_null=false
+opt_output_null () {
+    [[ ${output_separator+is-set} != is-set ]] || fail "Only one of options --output-null and --input-separator may be used."
+    [[ $output_null = false ]] || fail "Option --output-null may be used only once."
+    (( $# == 0 )) || fail "function $FUNCNAME requires 0 args (got $#)"
+    output_null=true
+}
+
 OPTIND=1
-while getopts :hi:o:-: option
+while getopts :hi:o:v-: option
 do case "$option" in
        h ) opt_help;;
        i ) opt_input_separator "$OPTARG";;
        o ) opt_output_separator "$OPTARG";;
+       v ) opt_verbose;;
        - ) case "$OPTARG" in
                help ) opt_help;;
                input-separator=* ) opt_input_separator "${OPTARG#*=}";;
                output-separator=* ) opt_output_separator "${OPTARG#*=}";;
-               input-separator | output-separator ) fail "Argument required for long option \"$OPTARG\"";;
-               help=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+               output-null ) opt_output_null;;
+               verbose ) opt_verbose;;
+               help=* \
+                 | output-null=* \
+                 | verbose=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+               input-separator \
+                 | output-separator ) fail "Argument required for long option \"$OPTARG\"";;
                * ) fail "Unknown long option \"${OPTARG%%=*}\"";;
             esac;;
         '?' ) fail "Unknown short option \"$OPTARG\"";;
@@ -84,7 +101,7 @@ has_printed=false
 print_separated () {
     (( $# == 1 )) || fail "$FUNCNAME must have 1 arg"
     if [[ $has_printed = true ]]
-    then if [[ $output_separator = '' ]]
+    then if [[ $output_null = true ]]
          then printf '\0'
          else printf "%s" "$output_separator"
          fi
@@ -94,11 +111,10 @@ print_separated () {
 }
 
 for string in "$@"
-do
-    if [[ $input_separator = "" ]]
-    then print_separated "$string"
-    else while read -r -d "$input_separator"
-         do print_separated "$REPLY"
-         done <<< "$string$input_separator"
-    fi
+do if [[ $input_separator = "" ]]
+   then print_separated "$string"
+   else while read -r -d "$input_separator"
+        do print_separated "$REPLY"
+        done <<< "$string$input_separator"
+   fi
 done
