@@ -20,12 +20,17 @@ then
   . "$(dirname "$BASH_SOURCE")"/command-path.bash
   . "$(dirname "$BASH_SOURCE")"/fail.bash
 
+  print_help () {
+      (( $# == 0 )) || fail "function $FUNCNAME must have 0 arguments (got $#)"
+      sed -e "s/.*#""HELP://p;d" "$(get_command_path_abs)" | m4 -P -DCOMMAND_NAME="$(get_command_path_short)"
+  }
+
   # Use command line help:
   #    #HELP:  --help | -h: Print this help
   # macro COMMAND_NAME will substitute for the short name of the command
   opt_help () {
       (( $# == 0 )) || fail "function $FUNCNAME must have 0 arguments (got $#)"
-      sed -e "s/.*#""HELP://p;d" "$(get_command_path_abs)" | m4 -P -DCOMMAND_NAME="$(get_command_path_short)"
+      print_help
       exit 0
   }
 fi
