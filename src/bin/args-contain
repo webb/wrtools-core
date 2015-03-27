@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Copyright 2015 Georgia Tech Research Corporation (GTRC). All rights reserved.
+
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#HELP:COMMAND_NAME: Report if item appears in list of arguments
+#HELP:Usage: COMMAND_NAME $item $arg1 $arg2 ...
+
+set -o nounset -o errexit
+
+root_dir=$(dirname "$0")/..
+. "$root_dir"/share/wrtools-core/opt_help.bash
+. "$root_dir"/share/wrtools-core/opt_verbose.bash
+. "$root_dir"/share/wrtools-core/fail.bash
+
+#HELP:Options:
+#HELP:  --help | -h: Print this help
+
+OPTIND=1
+while getopts :h-: option
+do case "$option" in
+       h ) opt_help;;
+       - ) case "$OPTARG" in
+               help ) opt_help;;
+               help=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+               * ) fail "Unknown long option \"${OPTARG%%=*}\"";;
+            esac;;
+        '?' ) fail "Unknown short option \"$OPTARG\"";;
+        : ) fail "Short option \"$OPTARG\" missing argument";;
+        * ) fail_assert "Bad state in getopts (OPTARG=\"$OPTARG\")";;
+   esac
+done
+shift $((OPTIND-1))
+
+for ((index = 2; index <= $#; ++index))
+do if [[ ${@:index:1} = $1 ]]
+   then exit 0
+   fi
+done
+exit 1
