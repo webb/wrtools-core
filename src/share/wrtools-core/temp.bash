@@ -28,6 +28,9 @@ then
   fi
 
   #HELP:  --keep-temps | -k: Don't delete temporary files
+  # k ) opt_keep_temps;;
+  # keep-temps ) opt_keep_temps;;
+  # keep-temps=* ) fail "No argument expected for long option \"${OPTARG%%=*}\"";;
   opt_keep_temps () {
       # we don't initialize this variable, because we want
       # temporary-file-keeping to propagate into subprocesses
@@ -43,7 +46,7 @@ then
       local VAR
       for VAR in "$@"
       do
-          local PATHNAME="$(umask 077; mktemp "$WRTOOLS_TEMP_DIR"/"$VAR".XXXXXX)"
+          local PATHNAME="$(umask 077; mktemp "$WRTOOLS_TEMP_DIR"/tmp."$VAR".XXXXXX)"
           eval "$VAR"="$PATHNAME"
           # Append here; don't reset it, since this may be called multiple times.
           WRTOOLS_TEMP_FILE_VARS+=("$VAR")
@@ -61,7 +64,7 @@ then
       local VAR
       for VAR in "$@"
       do
-          local PATHNAME="$(umask 077; mktemp -d "$WRTOOLS_TEMP_DIR"/"$VAR".XXXXXX)"
+          local PATHNAME="$(umask 077; mktemp -d "$WRTOOLS_TEMP_DIR"/tmp."$VAR".XXXXXX)"
           eval "$VAR"="$PATHNAME"
           # Append here; don't reset it, since this may be called multiple times.
           WRTOOLS_TEMP_DIR_VARS+=("$VAR")
