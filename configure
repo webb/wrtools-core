@@ -2029,8 +2029,10 @@ fi
 
 test "$bash" = "" && as_fn_error $? "bash not found" "$LINENO" 5
 
-# Extract the first word of "gfind find", so it can be a program name with args.
-set dummy gfind find; ac_word=$2
+for ac_prog in gfind find
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
 if ${ac_cv_path_find+:} false; then :
@@ -2068,6 +2070,9 @@ else
 $as_echo "no" >&6; }
 fi
 
+
+  test -n "$find" && break
+done
 
 test "$find" = "" && as_fn_error $? "find not found" "$LINENO" 5
 

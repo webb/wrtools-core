@@ -18,7 +18,7 @@ AC_PROG_SED
 AC_PATH_PROG(bash,bash)
 test "$bash" = "" && AC_MSG_ERROR([bash not found])
 
-AC_PATH_PROG(find,gfind find)
+AC_PATH_PROGS(find,gfind find)
 test "$find" = "" && AC_MSG_ERROR([find not found])
 
 AC_PATH_PROGS(m4,gm4 m4)
