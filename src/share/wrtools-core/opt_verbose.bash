@@ -34,13 +34,10 @@ then
 
   . "$(dirname "$BASH_SOURCE")"/command-path.bash
 
-  unset WRTOOLS_VERBOSE
-  opt_verbose () {
-      export WRTOOLS_VERBOSE=true
-  }
+  is_verbose () { false; }
 
-  is_verbose () {
-      [[ is-set = ${WRTOOLS_VERBOSE+is-set} ]]
+  opt_verbose () {
+      is_verbose () { true; }
   }
 
   vecho () {
