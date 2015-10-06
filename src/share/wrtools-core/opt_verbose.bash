@@ -34,10 +34,15 @@ then
 
   . "$(dirname "$BASH_SOURCE")"/command-path.bash
 
-  is_verbose () { false; }
+  # We want verbosity to propagate into subprocesses, so don't initialize the
+  # verbose variable, and export it when you set it.
+  
+  is_verbose () {
+      [[ ${WRTOOLS_OPT_VERBOSE_IS_VERBOSE-false} = true ]]
+  }
 
   opt_verbose () {
-      is_verbose () { true; }
+      export WRTOOLS_OPT_VERBOSE_IS_VERBOSE=true
   }
 
   vecho () {

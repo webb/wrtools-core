@@ -51,16 +51,23 @@ do case "$option" in
 done
 shift $((OPTIND-1))
 
+exit_status=0
+
 for file in "$@"
 do if is_paranoid
    then if [[ ! -f $file ]]
-        then printf "%s: not a file\n" "$file" >&2
-             break
+        then print_fail "not a file: %s" "$file"
+             exit_status=1
+             continue
         fi
    fi
    if ! xmllint --noout "$file"
-   then printf "%s: not an XML file\n" "$file" >&2
-        break
+   then printf "not an XML file: %s" "$file"
+        exit_status=1
+        continue
    fi
 done
+
+exit $exit_status
+
    

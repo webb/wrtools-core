@@ -27,6 +27,14 @@ then
       exit 1
   }
   
+  print_fail () {
+      printf "%s: Error: %s\n" "$(get_command_path_short)" "$*" >&2
+  }
+  
+  warn () {
+      printf "%s: Warning: %s\n" "$(get_command_path_short)" "$*" >&2
+  }
+  
   fail_assert () {
       printf "%s: Error: %s\n" "$(get_command_path_abs)" "$*" >&2
       local i

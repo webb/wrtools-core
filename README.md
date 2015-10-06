@@ -90,7 +90,7 @@ Check # of args for a function:
 or
 
 ```bash
-(( $# == 1 )) || fail_assert "$FUNCNAME expected 1 args, got $#"
+(( $# == 1 )) || fail_assert "$FUNCNAME expected 1 arg, got $#"
 ```
 
 ### Function `fail`
