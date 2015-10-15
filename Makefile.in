@@ -1,4 +1,6 @@
 
+SHELL = @bash@ -o pipefail -o nounset -o errexit
+
 # Copyright 2014-2015 Georgia Tech Research Corporation (GTRC). All rights reserved.
 
 # This program is free software: you can redistribute it and/or modify it under
@@ -14,12 +16,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SHELL = @bash@
-
+prefix = @prefix@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
-
-prefix = @prefix@
 
 GREP = @GREP@
 INSTALL = @INSTALL@
@@ -30,23 +29,61 @@ m4 = @m4@
 tar = @tar@
 zip = @zip@
 
+dist_name = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+share_dir_rel = share/${PACKAGE_NAME}
+build_dir = tmp/build
+all_dir = tmp/all
+
 src_files = $(shell $(find) src -type f ! -name '*~' ! -name '\#*\#' -print)
 
-all_files = $(src_files:src/%=tmp/all/%)
+step_files := ${src_files}
+step_files := ${step_files:src/%=${build_dir}/%}
+step_files := ${step_files:${build_dir}/share/%=${build_dir}/${share_dir_rel}/%}
+step_files := ${step_files:${build_dir}/%=${all_dir}/%}
 
-install_files = $(src_files:src/%=$(prefix)/%)
+all_files = ${step_files}
 
-# DIST stuff
-dist_name = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+install_files = $(all_files:${all_dir}/%=${prefix}/%)
 
 .PHONY: all clean distclean install uninstall dist zip
 
+#############################################################################
+# all
+
 all: $(all_files)
 
-tmp/all/%: src/%
+${all_dir}/%: ${build_dir}/%
+	${MKDIR_P} ${dir $@}
+	${INSTALL} -m 644 $< $@
+
+#############################################################################
+# build
+
+${build_dir}/${share_dir_rel}/%: src/share/%
 	$(MKDIR_P) $(dir $@)
-	$(INSTALL) $< $@
-	if [[ -x $< ]]; then chmod uog+x $@; fi
+	cp $< $@
+
+${build_dir}/%: src/%
+	$(MKDIR_P) $(dir $@)
+	cp $< $@
+
+#############################################################################
+# install
+
+install: $(install_files)
+
+uninstall:
+	$(RM) $(install_files)
+
+$(prefix)/bin/%: ${all_dir}/bin/%
+	$(MKDIR_P) $(dir $@)
+	$(INSTALL) -m 755 $< $@
+
+${prefix}/%: ${all_dir}/%
+	$(MKDIR_P) $(dir $@)
+	$(INSTALL) -m 644 $< $@
+
+#############################################################################
 
 clean:
 	$(RM) -r tmp/all
@@ -55,16 +92,6 @@ clean:
 distclean: clean
 	$(RM) -r autom4te.cache tmp
 	$(RM) Makefile config.log config.status stow.mk
-
-install: $(install_files)
-
-$(prefix)/%: tmp/all/%
-	$(MKDIR_P) $(dir $@)
-	$(INSTALL) $< $@
-	if [[ -x $< ]]; then chmod uog+x $@; fi
-
-uninstall:
-	$(RM) $(install_files)
 
 zip: all
 	$(RM) -r tmp/$(dist_name)
