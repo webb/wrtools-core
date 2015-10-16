@@ -61,7 +61,7 @@ all: $(all_files)
 
 ${all_dir}/%: ${build_dir}/%
 	${MKDIR_P} ${dir $@}
-	${INSTALL} -m 644 $< $@
+	cp $< $@
 
 #############################################################################
 # build
@@ -104,7 +104,7 @@ distclean: clean
 	$(RM) -r autom4te.cache tmp
 	$(RM) Makefile config.log config.status stow.mk
 
-`.PHONY: zip # Make a zip file
+.PHONY: zip # Make a zip file
 zip: 
 	$(MAKE)
 	${RM} -r tmp/${dist_name}
