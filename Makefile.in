@@ -23,6 +23,7 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 GREP = @GREP@
 INSTALL = @INSTALL@
 MKDIR_P = @MKDIR_P@
+SED = @SED@
 
 find = @find@
 m4 = @m4@
@@ -45,11 +46,17 @@ all_files = ${step_files}
 
 install_files = $(all_files:${all_dir}/%=${prefix}/%)
 
-.PHONY: all clean distclean install uninstall dist zip
+default: all
+
+.PHONY: help # Print this help
+help:
+	@ echo Available targets:
+	@ $(SED) -e 's/^.PHONY: *\([^ #]*\) *\# *\(.*\)$$/  \1: \2/p;d' Makefile
 
 #############################################################################
 # all
 
+.PHONY: all # Build all products
 all: $(all_files)
 
 ${all_dir}/%: ${build_dir}/%
@@ -70,8 +77,10 @@ ${build_dir}/%: src/%
 #############################################################################
 # install
 
+.PHONY: install # Install products to ${prefix} (defaults to @prefix@, set via configure)
 install: $(install_files)
 
+.PHONY: uninstall # Remove installed products
 uninstall:
 	$(RM) $(install_files)
 
@@ -85,16 +94,19 @@ ${prefix}/%: ${all_dir}/%
 
 #############################################################################
 
+.PHONY: clean # Remove products of make
 clean:
 	$(RM) -r tmp/all
 	$(RM) $(wildcard *~)
 
+.PHONY: distclean # Remove products of configure
 distclean: clean
 	$(RM) -r autom4te.cache tmp
 	$(RM) Makefile config.log config.status stow.mk
 
-zip: all
-	$(RM) -r tmp/$(dist_name)
-	$(MKDIR_P) tmp/$(dist_name)
-	(cd tmp/all && $(tar) cf - .) | (cd tmp/$(dist_name) && $(tar) xf -)
+`.PHONY: zip # Make a zip file
+zip: 
+	$(MAKE)
+	${RM} -r tmp/${dist_name}
+	$(MAKE) prefix=tmp/${dist_name} install
 	cd tmp && $(zip) -9 -r $(dist_name).zip $(dist_name)
