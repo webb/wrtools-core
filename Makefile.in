@@ -48,6 +48,8 @@ install_files = $(all_files:${all_dir}/%=${prefix}/%)
 
 default: all
 
+.SECONDARY:
+
 .PHONY: help # Print this help
 help:
 	@ echo Available targets:
@@ -60,18 +62,18 @@ help:
 all: $(all_files)
 
 ${all_dir}/%: ${build_dir}/%
-	${MKDIR_P} ${dir $@}
+	@ ${MKDIR_P} ${dir $@}
 	cp $< $@
 
 #############################################################################
 # build
 
 ${build_dir}/${share_dir_rel}/%: src/share/%
-	$(MKDIR_P) $(dir $@)
+	@ $(MKDIR_P) $(dir $@)
 	cp $< $@
 
 ${build_dir}/%: src/%
-	$(MKDIR_P) $(dir $@)
+	@ $(MKDIR_P) $(dir $@)
 	cp $< $@
 
 #############################################################################
@@ -85,11 +87,11 @@ uninstall:
 	$(RM) $(install_files)
 
 $(prefix)/bin/%: ${all_dir}/bin/%
-	$(MKDIR_P) $(dir $@)
+	@ $(MKDIR_P) $(dir $@)
 	$(INSTALL) -m 755 $< $@
 
 ${prefix}/%: ${all_dir}/%
-	$(MKDIR_P) $(dir $@)
+	@ $(MKDIR_P) $(dir $@)
 	$(INSTALL) -m 644 $< $@
 
 #############################################################################
