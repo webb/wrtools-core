@@ -61,8 +61,9 @@ opt_output_null () {
 }
 
 OPTIND=1
-while getopts :hi:o:v-: option
+while getopts :0hi:o:v-: option
 do case "$option" in
+       0 ) opt_output_null;;
        h ) opt_help;;
        i ) opt_input_separator "$OPTARG";;
        o ) opt_output_separator "$OPTARG";;
