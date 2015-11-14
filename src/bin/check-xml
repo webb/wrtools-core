@@ -56,13 +56,13 @@ exit_status=0
 for file in "$@"
 do if is_paranoid
    then if [[ ! -f $file ]]
-        then print_fail "not a file: %s" "$file"
+        then print_fail "not a file: $file"
              exit_status=1
              continue
         fi
    fi
    if ! xmllint --noout "$file"
-   then printf "not an XML file: %s" "$file"
+   then printf "not an XML file: $file"
         exit_status=1
         continue
    fi
