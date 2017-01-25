@@ -51,7 +51,7 @@ then
           # Append here; don't reset it, since this may be called multiple times.
           WRTOOLS_TEMP_FILE_VARS+=("$VAR")
           WRTOOLS_TEMP_FILES+=("$PATHNAME")
-          vecho "make_temp_file(): $VAR=\"$PATHNAME\""
+          vecho "$FUNCNAME(): $VAR=\"$PATHNAME\""
       done
   }
 
@@ -69,7 +69,7 @@ then
           # Append here; don't reset it, since this may be called multiple times.
           WRTOOLS_TEMP_DIR_VARS+=("$VAR")
           WRTOOLS_TEMP_DIRS+=("$PATHNAME")
-          vecho "make_temp_dir(): $VAR=\"$PATHNAME\""
+          vecho "$FUNCNAME(): $VAR=\"$PATHNAME\""
       done
   }
 
