@@ -23,6 +23,9 @@
 #               verbose ) opt_verbose;;
 #               verbose=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
 
+# if you want to turn on verbose before the script even gets started, do:
+#    WRTOOLS_OPT_VERBOSE_IS_VERBOSE=true command ...
+
 
 if test is-set != "${WRTOOLS_LOADED_OPT_VERBOSE_BASH+is-set}"
 then
