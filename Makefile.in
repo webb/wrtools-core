@@ -1,0 +1,93 @@
+#############################################################################
+# Don't touch these...
+#############################################################################
+
+this_makefile := ${lastword ${MAKEFILE_LIST}}
+SHELL = @bash@ -o pipefail -o errexit -o nounset
+# generated dependencies for things derived from the NDR doc
+dependencies_mk := dependencies.mk
+.SECONDARY:
+
+#############################################################################
+# things to set / override
+#############################################################################
+
+PACKAGE_NAME = @PACKAGE_NAME@
+
+prefix = @prefix@
+srcdir = @srcdir@
+builddir = @builddir@
+
+# PROGRAMS
+
+MKDIR_P = @MKDIR_P@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+SED = @SED@
+
+files_src_default := \
+  ${shell find ${srcdir}/bin -type f} \
+  ${shell find ${srcdir}/share -type f}
+
+files_src = ${files_src_default}
+files = ${files_src:${srcdir}/%=%} \
+  share/doc/${PACKAGE_NAME}/README.html \
+  share/doc/${PACKAGE_NAME}/README.md \
+
+#############################################################################
+#HELP:Default target is "all". Targets include:
+.DEFAULT_GOAL = all
+
+.PHONY: all #    Build everything
+all: ${files:%=${builddir}/build/%}
+
+.PHONY: install #    Install to $prefix (default "@prefix@")
+install: ${files:%=${prefix}/%}
+
+.PHONY: clean #    clean build products
+clean:
+	${RM} -r ${builddir}/build
+	find . -type f -name '.DS_Store' -delete
+	find . -type f -name '*~' -delete
+	find . -type f -name 'tmp.*' -delete
+
+.PHONY: distclean #    Clean all products
+distclean: clean
+	${RM} ${dependencies_mk} config.log config.status Makefile
+
+#############################################################################
+# build
+
+# import
+${builddir}/build/% : ${srcdir}/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
+
+${builddir}/build/share/doc/${PACKAGE_NAME}/README.html: ${builddir}/build/README.md
+	@ ${MKDIR_P} -- ${dir $@}
+	rmultimarkdown --output $@ $<
+
+${builddir}/build/share/doc/${PACKAGE_NAME}/README.md: ${builddir}/build/README.md
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
+
+#############################################################################
+# install
+
+${prefix}/bin/%: ${builddir}/build/bin/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_PROGRAM} -- $< $@
+
+${prefix}/%: ${builddir}/build/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
+
+#############################################################################
+# make help: this must be the last target
+
+.PHONY: help #    Print this help
+help:
+	@ ${SED} -e '/^\.PHONY:/s/^\.PHONY: *\([^ #]*\) *\#\( *\)\([^ ].*\)/\2\1: \3/p;/^[^#]*#HELP:/s/[^#]*#HELP:\(.*\)/\1/p;d' ${this_makefile}
+
+# don't put anything after this
