@@ -1,0 +1,153 @@
+#############################################################################
+# Don't touch these...
+#############################################################################
+
+this_makefile := ${lastword ${MAKEFILE_LIST}}
+SHELL = @bash@ -o pipefail -o errexit -o nounset
+# generated dependencies for things derived from the NDR doc
+dependencies_mk := dependencies.mk
+.SECONDARY:
+
+#############################################################################
+# things to set / override
+#############################################################################
+
+#HELP:Variable 'depend':
+#HELP:    'build': Build new dependencies file (the default)
+#HELP:    anything else: If dependencies file exists, include it
+depend = build
+
+src_dir = @srcdir@/src
+build_dir = @builddir@/build
+output_dir = @output_dir@
+
+# PROGRAMS
+
+MKDIR_P = @MKDIR_P@
+fgrep = @fgrep@
+head = @head@
+install = @INSTALL@
+m4 = @m4@
+mkdir_p = @MKDIR_P@
+rm = ${RM}
+sed = @SED@
+
+# # webb's programs
+doc_to_schematron = @doc_to_schematron@
+schematron_compile = @schematron_compile@
+process_doc = @process_doc@
+get_xml_catalog = @get_xml_catalog@
+
+doc_name = schematron-in-xsd
+
+sch_name = ${doc_name}-rules-for-xsd.sch
+doc_html = ${build_dir}/${doc_name}.html
+doc_xml = ${build_dir}/${doc_name}.xml
+
+output_files = \
+  ${addprefix ${output_dir}/, \
+    ${doc_name}.html \
+    ${doc_name}.txt \
+    ${doc_name}.xsd \
+    ${sch_name} \
+    ${sch_name}.xsl }
+
+m4_required_files = ${src_dir}/macros.m4
+m4_flags = --prefix-builtins ${m4_required_files}
+
+schema_files = ${patsubst ${src_dir}/%,${build_dir}/%, \
+  ${patsubst %.xsd.m4,%.xsd,${wildcard ${src_dir}/*.xsd.m4}} \
+  ${wildcard ${src_dir}/*.xsd}}
+
+xml_catalog_required_files = ${schema_files}
+xml_catalog = xml-catalog.xml
+
+process_doc_required_files = ${xml_catalog} ${xml_catalog_required_files}
+process_doc_flags = --catalog=${xml_catalog}
+
+#HELP:Default target is "all". Targets include:
+.DEFAULT_GOAL = all
+
+#############################################################################
+# depend
+
+ifeq (${depend},build)
+.PHONY: depend #    Rebuild dependencies (available only if $depend=build)
+depend: ${dependencies_mk}
+
+-include ${dependencies_mk}
+
+${dependencies_mk}: ${doc_xml} ${process_doc_required_files}
+	${process_doc} ${process_doc_flags} --format=makedepend --in=$< --out=$@
+else
+ifeq (${wildcard ${dependencies_mk}},${dependencies_mk})
+include ${dependencies_mk}
+endif
+endif
+
+#############################################################################
+# phony targets
+
+.PHONY: all #    Build everything
+all: ${output_files}
+
+.PHONY: html #    Build the HTML document
+html: ${doc_html}
+
+.PHONY: clean #    clean build products
+clean:
+	${rm} -r ${build_dir} ${xml_catalog}
+	find . -type f -name '.DS_Store' -delete
+	find . -type f -name '*~' -delete
+	find . -type f -name 'tmp.*' -delete
+
+.PHONY: distclean #    Clean all products
+distclean: clean
+	${rm} ${dependencies_mk} config.log config.status Makefile
+
+#############################################################################
+# build
+
+# import
+${build_dir}/% : ${src_dir}/%
+	${mkdir_p} ${dir $@}
+	${install} $< $@
+
+# run m4
+${build_dir}/% : ${build_dir}/%.m4 ${m4_required_files}
+	@ ${mkdir_p} ${dir $@}
+	${m4} ${m4_flags} $< > $@
+	@ if ${fgrep} MACRO_ $@; then echo found unexpanded macro in $@; false; fi
+
+# xml catalog for testing xml in the doc
+${xml_catalog}: ${xml_catalog_required_files}
+	@ ${mkdir_p} ${dir $@}
+	${get_xml_catalog} $^ > $@
+
+${doc_html}: ${doc_xml} ${doc_html_required_files} ${process_doc_required_files}
+	${process_doc} ${process_doc_flags} --in=$< --out=$@
+
+${build_dir}/${doc_name}.txt : ${doc_xml} ${doc_text_required_files} ${process_doc_required_files}
+	${process_doc} ${process_doc_flags} --format=text --in=$< --out=$@ --catalog=${xml_catalog}
+
+${build_dir}/${doc_name}-rules-for-xsd.sch: ${doc_xml}
+	${doc_to_schematron} --blurb-set=sch --title="Rules for XML Schema Documents" --out=$@ $<
+
+${build_dir}/%.sch.xsl: ${build_dir}/%.sch
+	${schematron_compile} --output-file=$@ $<
+
+#############################################################################
+# output
+
+${output_dir}/%: ${build_dir}/%
+	@ ${mkdir_p} ${dir $@}
+	${install} $< $@
+
+#############################################################################
+# make help: this must be the last target
+
+.PHONY: help #    Print this help
+help:
+	@ ${sed} -e '/^\.PHONY:/s/^\.PHONY: *\([^ #]*\) *\#\( *\)\([^ ].*\)/\2\1: \3/p;/^[^#]*#HELP:/s/[^#]*#HELP:\(.*\)/\1/p;d' ${this_makefile}
+
+# don't put anything after this
