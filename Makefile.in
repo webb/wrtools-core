@@ -12,142 +12,82 @@ dependencies_mk := dependencies.mk
 # things to set / override
 #############################################################################
 
-#HELP:Variable 'depend':
-#HELP:    'build': Build new dependencies file (the default)
-#HELP:    anything else: If dependencies file exists, include it
-depend = build
+PACKAGE_NAME = @PACKAGE_NAME@
 
-src_dir = @srcdir@/src
-build_dir = @builddir@/build
-output_dir = @output_dir@
+prefix = @prefix@
+srcdir = @srcdir@
+builddir = @builddir@
 
 # PROGRAMS
 
 MKDIR_P = @MKDIR_P@
-fgrep = @fgrep@
-head = @head@
-install = @INSTALL@
-m4 = @m4@
-mkdir_p = @MKDIR_P@
-rm = ${RM}
-sed = @SED@
+INSTALL = @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+SED = @SED@
 
-# # webb's programs
-doc_to_schematron = @doc_to_schematron@
-schematron_compile = @schematron_compile@
-process_doc = @process_doc@
-get_xml_catalog = @get_xml_catalog@
+files_src_default := \
+  ${shell find ${srcdir}/bin -type f} \
+  ${shell find ${srcdir}/share -type f}
 
-doc_name = schematron-in-xsd
+files_src = ${files_src_default}
+files = ${files_src:${srcdir}/%=%} \
+  share/doc/${PACKAGE_NAME}/README.html \
+  share/doc/${PACKAGE_NAME}/README.md \
 
-sch_name = ${doc_name}-rules-for-xsd.sch
-doc_html = ${build_dir}/${doc_name}.html
-doc_xml = ${build_dir}/${doc_name}.xml
-
-output_files = \
-  ${addprefix ${output_dir}/, \
-    ${doc_name}.html \
-    ${doc_name}.txt \
-    ${doc_name}.xsd \
-    ${sch_name} \
-    ${sch_name}.xsl }
-
-m4_required_files = ${src_dir}/macros.m4
-m4_flags = --prefix-builtins ${m4_required_files}
-
-schema_files = ${patsubst ${src_dir}/%,${build_dir}/%, \
-  ${patsubst %.xsd.m4,%.xsd,${wildcard ${src_dir}/*.xsd.m4}} \
-  ${wildcard ${src_dir}/*.xsd}}
-
-xml_catalog_required_files = ${schema_files}
-xml_catalog = xml-catalog.xml
-
-process_doc_required_files = ${xml_catalog} ${xml_catalog_required_files}
-process_doc_flags = --catalog=${xml_catalog}
-
+#############################################################################
 #HELP:Default target is "all". Targets include:
 .DEFAULT_GOAL = all
 
-#############################################################################
-# depend
-
-ifeq (${depend},build)
-.PHONY: depend #    Rebuild dependencies (available only if $depend=build)
-depend: ${dependencies_mk}
-
--include ${dependencies_mk}
-
-${dependencies_mk}: ${doc_xml} ${process_doc_required_files}
-	${process_doc} ${process_doc_flags} --format=makedepend --in=$< --out=$@
-else
-ifeq (${wildcard ${dependencies_mk}},${dependencies_mk})
-include ${dependencies_mk}
-endif
-endif
-
-#############################################################################
-# phony targets
-
 .PHONY: all #    Build everything
-all: ${output_files}
+all: ${files:%=${builddir}/build/%}
 
-.PHONY: html #    Build the HTML document
-html: ${doc_html}
+.PHONY: install #    Install to $prefix (default "@prefix@")
+install: ${files:%=${prefix}/%}
 
 .PHONY: clean #    clean build products
 clean:
-	${rm} -r ${build_dir} ${xml_catalog}
+	${RM} -r ${builddir}/build
 	find . -type f -name '.DS_Store' -delete
 	find . -type f -name '*~' -delete
 	find . -type f -name 'tmp.*' -delete
 
 .PHONY: distclean #    Clean all products
 distclean: clean
-	${rm} ${dependencies_mk} config.log config.status Makefile
+	${RM} ${dependencies_mk} config.log config.status Makefile
 
 #############################################################################
 # build
 
 # import
-${build_dir}/% : ${src_dir}/%
-	${mkdir_p} ${dir $@}
-	${install} $< $@
+${builddir}/build/% : ${srcdir}/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
 
-# run m4
-${build_dir}/% : ${build_dir}/%.m4 ${m4_required_files}
-	@ ${mkdir_p} ${dir $@}
-	${m4} ${m4_flags} $< > $@
-	@ if ${fgrep} MACRO_ $@; then echo found unexpanded macro in $@; false; fi
+${builddir}/build/share/doc/${PACKAGE_NAME}/README.html: ${builddir}/build/README.md
+	@ ${MKDIR_P} -- ${dir $@}
+	rmultimarkdown --output $@ $<
 
-# xml catalog for testing xml in the doc
-${xml_catalog}: ${xml_catalog_required_files}
-	@ ${mkdir_p} ${dir $@}
-	${get_xml_catalog} $^ > $@
-
-${doc_html}: ${doc_xml} ${doc_html_required_files} ${process_doc_required_files}
-	${process_doc} ${process_doc_flags} --in=$< --out=$@
-
-${build_dir}/${doc_name}.txt : ${doc_xml} ${doc_text_required_files} ${process_doc_required_files}
-	${process_doc} ${process_doc_flags} --format=text --in=$< --out=$@ --catalog=${xml_catalog}
-
-${build_dir}/${doc_name}-rules-for-xsd.sch: ${doc_xml}
-	${doc_to_schematron} --blurb-set=sch --title="Rules for XML Schema Documents" --out=$@ $<
-
-${build_dir}/%.sch.xsl: ${build_dir}/%.sch
-	${schematron_compile} --output-file=$@ $<
+${builddir}/build/share/doc/${PACKAGE_NAME}/README.md: ${builddir}/build/README.md
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
 
 #############################################################################
-# output
+# install
 
-${output_dir}/%: ${build_dir}/%
-	@ ${mkdir_p} ${dir $@}
-	${install} $< $@
+${prefix}/bin/%: ${builddir}/build/bin/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_PROGRAM} -- $< $@
+
+${prefix}/%: ${builddir}/build/%
+	@ ${MKDIR_P} -- ${dir $@}
+	${INSTALL_DATA} -- $< $@
 
 #############################################################################
 # make help: this must be the last target
 
 .PHONY: help #    Print this help
 help:
-	@ ${sed} -e '/^\.PHONY:/s/^\.PHONY: *\([^ #]*\) *\#\( *\)\([^ ].*\)/\2\1: \3/p;/^[^#]*#HELP:/s/[^#]*#HELP:\(.*\)/\1/p;d' ${this_makefile}
+	@ ${SED} -e '/^\.PHONY:/s/^\.PHONY: *\([^ #]*\) *\#\( *\)\([^ ].*\)/\2\1: \3/p;/^[^#]*#HELP:/s/[^#]*#HELP:\(.*\)/\1/p;d' ${this_makefile}
 
 # don't put anything after this

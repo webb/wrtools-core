@@ -30,6 +30,8 @@ AC_DEFUN([WR_check_prog_options],[AC_PATH_PROGS($1,$2)
 # only put critical programs required to build 'all' here.
 
 WR_check_prog(bash)
+WR_check_prog_options(find,gfind find)
 
 AC_CONFIG_FILES([Makefile], [chmod 444 Makefile])
+AC_CONFIG_FILES([stow.mk], [chmod 444 stow.mk])
 AC_OUTPUT

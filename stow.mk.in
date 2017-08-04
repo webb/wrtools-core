@@ -4,7 +4,7 @@ SHELL = @bash@
 PACKAGE_NAME = @PACKAGE_NAME@
 prefix = @prefix@
 
-stow = @stow@
+stow = stow
 
 .PHONY: all unstow uninstall install stow rm
 all: rm install stow
