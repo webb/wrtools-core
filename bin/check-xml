@@ -25,6 +25,7 @@ root_dir=$(dirname "$0")/..
 . "$root_dir"/share/wrtools-core/opt_verbose.bash
 . "$root_dir"/share/wrtools-core/fail.bash
 . "$root_dir"/share/wrtools-core/paranoia.bash
+. "$root_dir"/share/wrtools-core/temp.bash
 
 #HELP:Options:
 #HELP:  --help | -h: Print this help
@@ -52,6 +53,7 @@ done
 shift $((OPTIND-1))
 
 exit_status=0
+temp_make_file output
 
 for file in "$@"
 do vecho "checking \"$file\""
@@ -62,9 +64,10 @@ do vecho "checking \"$file\""
              continue
         fi
    fi
-   if ! vrun xmllint --noout "$file"
+   if ! test-run --stdout=/dev/null --stderr=/dev/null --exit-status=0 -- xmllint --noout "$file" > "$output"
    then printf "not an XML file: $file"
         exit_status=1
+        cat "$output"
         continue
    fi
 done

@@ -31,6 +31,7 @@ AC_DEFUN([WR_check_prog_options],[AC_PATH_PROGS($1,$2)
 
 WR_check_prog(bash)
 WR_check_prog_options(find,gfind find)
+WR_check_prog(rmultimarkdown)
 
 AC_CONFIG_FILES([Makefile], [chmod 444 Makefile])
 AC_CONFIG_FILES([stow.mk], [chmod 444 stow.mk])

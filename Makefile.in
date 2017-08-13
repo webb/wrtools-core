@@ -25,10 +25,11 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 SED = @SED@
+rmultimarkdown = @rmultimarkdown@
 
 files_src_default := \
-  ${shell find ${srcdir}/bin -type f} \
-  ${shell find ${srcdir}/share -type f}
+  ${shell find ${srcdir}/bin -type f ! -name '*~' ! -name '\#*\#' } \
+  ${shell find ${srcdir}/share -type f ! -name '*~' ! -name '\#*\#' }
 
 files_src = ${files_src_default}
 files = ${files_src:${srcdir}/%=%} \
@@ -66,7 +67,7 @@ ${builddir}/build/% : ${srcdir}/%
 
 ${builddir}/build/share/doc/${PACKAGE_NAME}/README.html: ${builddir}/build/README.md
 	@ ${MKDIR_P} -- ${dir $@}
-	rmultimarkdown --output $@ $<
+	${rmultimarkdown} --output $@ $<
 
 ${builddir}/build/share/doc/${PACKAGE_NAME}/README.md: ${builddir}/build/README.md
 	@ ${MKDIR_P} -- ${dir $@}
