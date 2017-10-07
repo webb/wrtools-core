@@ -43,9 +43,6 @@ files = ${files_src:${srcdir}/%=%} \
 .PHONY: all #    Build everything
 all: ${files:%=${builddir}/build/%}
 
-.PHONY: install #    Install to $prefix (default "@prefix@")
-install: ${files:%=${prefix}/%}
-
 .PHONY: clean #    clean build products
 clean:
 	${RM} -r ${builddir}/build
@@ -75,6 +72,16 @@ ${builddir}/build/share/doc/${PACKAGE_NAME}/README.md: ${builddir}/build/README.
 
 #############################################################################
 # install
+
+.PHONY: install #    Install to $prefix
+install: check-prefix ${files:%=${prefix}/%}
+
+.PHONY: check-prefix
+check-prefix:
+	@ if [[ -z "${prefix}" ]]; then \
+	  printf "ERROR: Variable \$$prefix must be set\n" >&2; \
+	  exit 1; \
+	fi	
 
 ${prefix}/bin/%: ${builddir}/build/bin/%
 	@ ${MKDIR_P} -- ${dir $@}

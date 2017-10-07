@@ -8,8 +8,9 @@ if test -f Makefile.in
 then AC_MSG_ERROR([Do not build where you code (found Makefile.in)])
 fi
 
-if test "x$prefix" = "xNONE"
-then AC_MSG_ERROR([prefix is unset])
+if test "x$prefix" != "xNONE"
+then AC_MSG_ERROR([Do not provide prefix. Package is relocatable])
+else prefix=
 fi
 
 # Checks for programs.

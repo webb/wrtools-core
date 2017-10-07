@@ -1683,8 +1683,9 @@ if test -f Makefile.in
 then as_fn_error $? "Do not build where you code (found Makefile.in)" "$LINENO" 5
 fi
 
-if test "x$prefix" = "xNONE"
-then as_fn_error $? "prefix is unset" "$LINENO" 5
+if test "x$prefix" != "xNONE"
+then as_fn_error $? "Do not provide prefix. Package is relocatable" "$LINENO" 5
+else prefix=
 fi
 
 # Checks for programs.
