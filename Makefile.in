@@ -15,6 +15,8 @@ PACKAGE_NAME = @PACKAGE_NAME@
 prefix = @prefix@
 srcdir = @srcdir@
 builddir = @builddir@
+tmp_dir = ${builddir}/tmp
+install_dir = ${prefix}
 
 # PROGRAMS
 
@@ -23,6 +25,8 @@ INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 SED = @SED@
+
+config_files = @config_files@
 
 all_files_relative = \
   bin/tokenize-strings \
@@ -37,39 +41,53 @@ all_files_relative = \
   share/wrtools-core/paranoia.bash \
   share/wrtools-core/command-path.bash \
 
-all_files = ${all_files_relative:%=${srcdir}/%}
+all_files = ${all_files_relative:%=${tmp_dir}/%}
 
-install_files = ${all_files_relative:%=${prefix}/%}
+install_files = ${all_files_relative:%=${install_dir}/%}
 
 #############################################################################
 #HELP:Default target is "all". Targets include:
 .DEFAULT_GOAL = all
 
 .PHONY: all #    Build everything
-all: ${all_files}
+all: show_all ${all_files}
+
+show_all:
+	@echo all_files = ${all_files}
 
 .PHONY: install #    Install to $prefix (default "@prefix@")
 install: ${install_files}
 
+.PHONY: uninstall #    Remove installed files
+uninstall:
+	${RM} ${install_files}
+
 .PHONY: clean #    clean build products
 clean:
-	${RM} -r ${builddir}/build
+	${RM} -r ${all_files}
 
 .PHONY: distclean #    Clean all products
 distclean: clean
-	${RM} ${dependencies_mk} config.log config.status Makefile
+	${RM} ${config_files} config.log config.status
 
 #############################################################################
-# build
+# all
+
+./bin/tokenize-strings: ../repo/bin/tokenize-strings
+	echo bogus $< $@
+
+${tmp_dir}/%: ${srcdir}/%
+	${MKDIR_P} ${dir $@}
+	${INSTALL_DATA} -- $< $@
 
 #############################################################################
 # install
 
-${prefix}/bin/%: ${builddir}/bin/%
+${install_dir}/bin/%: ${tmp_dir}/bin/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_PROGRAM} -- $< $@
 
-${prefix}/%: ${builddir}/%
+${install_dir}/%: ${tmp_dir}/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_DATA} -- $< $@
 

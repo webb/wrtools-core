@@ -4,10 +4,6 @@ AC_PREREQ([2.69])
 AC_INIT([wrtools-core], [0], [webb@webbroberts.com])
 AC_COPYRIGHT
 
-if test -f Makefile.in
-then AC_MSG_ERROR([Do not build where you code (found Makefile.in)])
-fi
-
 if test "x$prefix" = "xNONE"
 then AC_MSG_ERROR([prefix is unset])
 fi
@@ -34,4 +30,5 @@ WR_check_prog_options(find,gfind find)
 
 AC_CONFIG_FILES([Makefile], [chmod 444 Makefile])
 AC_CONFIG_FILES([stow.mk], [chmod 444 stow.mk])
+AC_SUBST([config_files],$ac_config_files)
 AC_OUTPUT

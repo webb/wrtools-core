@@ -589,6 +589,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+config_files
 find
 bash
 SED
@@ -1678,10 +1679,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-if test -f Makefile.in
-then as_fn_error $? "Do not build where you code (found Makefile.in)" "$LINENO" 5
-fi
-
 if test "x$prefix" = "xNONE"
 then as_fn_error $? "prefix is unset" "$LINENO" 5
 fi
@@ -2016,6 +2013,8 @@ done
 ac_config_files="$ac_config_files Makefile"
 
 ac_config_files="$ac_config_files stow.mk"
+
+config_files=$ac_config_files
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
