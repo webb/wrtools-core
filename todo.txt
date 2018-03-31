@@ -1,0 +1,3 @@
+
+configure theoretically supports --prefix=...; figure out how to wire that in.
+
