@@ -196,3 +196,18 @@ do_thing_two () { cat /etc/hosts; }
 add_exit_hook do_thing_one do_thing_two
 ```
 
+# Updating the package
+
+If you've modified `configure.ac`, update things by running:
+
+```bash
+$ make -f unconfigured.mk
+```
+
+## Prerequisited
+
+This requires packages:
+
+* autoconf
+* automake
+
