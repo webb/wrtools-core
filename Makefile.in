@@ -11,6 +11,7 @@ SHELL = @bash@ -o pipefail -o errexit -o nounset
 #############################################################################
 
 PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
 
 prefix = @prefix@
 srcdir = @srcdir@
