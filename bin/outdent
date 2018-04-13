@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -o nounset -o errexit -o pipefail
+
+root_dir=$(dirname "$0")/..
+
+. "$HOME"/share/wrtools-core/opt_help.bash
+. "$HOME"/share/wrtools-core/opt_verbose.bash
+. "$HOME"/share/wrtools-core/fail.bash
+. "$HOME"/share/wrtools-core/temp.bash
+
+#HELP:COMMAND_NAME: Measure and cut prefixing spaces from a document
+#HELP:Usage: COMMAND_NAME < $in > $out
+#HELP:  You may want to first use 'expand' to convert tabs in input.
+
+#HELP:Options:
+#HELP:  --help | -h: Print this help
+#HELP:  --verbose, -v: Print additional diagnostics
+
+OPTIND=1
+while getopts :0hi:o:v-: option
+do case "$option" in
+       h ) opt_help;;
+       v ) opt_verbose;;
+       - ) case "$OPTARG" in
+               help ) opt_help;;
+               verbose ) opt_verbose;;
+               help=* | verbose=* )
+                   fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+               * ) fail "Unknown long option \"${OPTARG%%=*}\"";;
+            esac;;
+        '?' ) fail "Unknown short option \"$OPTARG\"";;
+        : ) fail "Short option \"$OPTARG\" missing argument";;
+        * ) fail_assert "Bad state in getopts (OPTARG=\"$OPTARG\")";;
+   esac
+done
+shift $((OPTIND-1))
+
+(( $# == 0 )) || fail "Expected no args (got $#)"
+
+temp_make_file input
+
+cat > "$input"
+
+# printf is used as an error check on output of the awk command
+printf -v start_position '%d' "$(awk '{
+  this = match($0, /[^ ]/)
+  if (shortest == 0) {
+    shortest = this
+  } else if (this > 0) {
+    if (this < shortest) shortest = this
+  }
+}
+END { printf "%d\n", shortest }' "$input")"
+
+if (( start_position == 0 ))
+then cat "$input"
+else cut --characters="$start_position"- "$input"
+fi
