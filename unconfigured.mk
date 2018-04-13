@@ -10,10 +10,8 @@ SHELL = bash -o pipefail -o errexit -o nounset
 SED = sed
 # autoconf apps
 autoreconf = autoreconf
+autoreconf_flags = 
 glibtoolize = glibtoolize
-# normal stuff
-find = find
-rmultimarkdown = rmultimarkdown
 
 all_files = \
   install-sh \
@@ -37,7 +35,7 @@ clean:
 # build 
 
 configure: configure.ac
-	${autoreconf} --install --verbose
+	${autoreconf} ${autoreconf_flags} --install --verbose
 
 install-sh:
 	${glibtoolize} -icf

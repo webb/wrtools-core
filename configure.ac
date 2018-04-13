@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([wrtools-core], m4_esyscmd_s([git describe --tags --always]), [webb@webbroberts.com])
+AC_INIT([WR Tools: Core],[0],[https://github.com/webb/wrtools-core/issues],[wrtools-core],[https://github.com/webb/wrtools-core/])
 AC_COPYRIGHT
 
 if test "x$prefix" = "xNONE"

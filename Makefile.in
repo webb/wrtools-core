@@ -10,51 +10,37 @@ SHELL = @bash@ -o pipefail -o errexit -o nounset
 # things to set / override
 #############################################################################
 
-PACKAGE_NAME = @PACKAGE_NAME@
-PACKAGE_VERSION = @PACKAGE_VERSION@
+#HELP:Build package "@PACKAGE_NAME@" (@PACKAGE_TARNAME@)
 
 prefix = @prefix@
-srcdir = @srcdir@
-builddir = @builddir@
-tmp_dir = ${builddir}/tmp
+src_dir = @srcdir@/src
+build_dir = @builddir@/build
 install_dir = ${prefix}
 
 # PROGRAMS
 
+# autoconf names
 MKDIR_P = @MKDIR_P@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 SED = @SED@
+# other names
+find = @find@
 
 config_files = @config_files@
 
-all_files_relative = \
-  bin/tokenize-strings \
-  bin/args-contain \
-  bin/test-run \
-  bin/check-xml \
-  share/wrtools-core/fail.bash \
-  share/wrtools-core/temp.bash \
-  share/wrtools-core/exit_hook.bash \
-  share/wrtools-core/opt_verbose.bash \
-  share/wrtools-core/opt_help.bash \
-  share/wrtools-core/paranoia.bash \
-  share/wrtools-core/command-path.bash \
+all_files_default := ${patsubst ${src_dir}/%,${build_dir}/%,${shell ${find} ${src_dir} -type f ! -name '*~'}}
 
-all_files = ${all_files_relative:%=${tmp_dir}/%}
-
-install_files = ${all_files_relative:%=${install_dir}/%}
+all_files = ${all_files_default}
+install_files = ${all_files:${build_dir}/%=${install_dir}/%}
 
 #############################################################################
 #HELP:Default target is "all". Targets include:
 .DEFAULT_GOAL = all
 
 .PHONY: all #    Build everything
-all: show_all ${all_files}
-
-show_all:
-	@echo all_files = ${all_files}
+all: ${all_files}
 
 .PHONY: install #    Install to $prefix (default "@prefix@")
 install: ${install_files}
@@ -74,21 +60,18 @@ distclean: clean
 #############################################################################
 # all
 
-./bin/tokenize-strings: ../repo/bin/tokenize-strings
-	echo bogus $< $@
-
-${tmp_dir}/%: ${srcdir}/%
+${build_dir}/%: ${src_dir}/%
 	${MKDIR_P} ${dir $@}
 	${INSTALL_DATA} -- $< $@
 
 #############################################################################
 # install
 
-${install_dir}/bin/%: ${tmp_dir}/bin/%
+${install_dir}/bin/%: ${build_dir}/bin/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_PROGRAM} -- $< $@
 
-${install_dir}/%: ${tmp_dir}/%
+${install_dir}/%: ${build_dir}/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_DATA} -- $< $@
 
