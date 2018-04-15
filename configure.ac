@@ -2,10 +2,9 @@
 
 AC_PREREQ([2.69])
 AC_INIT([WR Tools: Core],[0],[https://github.com/webb/wrtools-core/issues],[wrtools-core],[https://github.com/webb/wrtools-core/])
-AC_COPYRIGHT
 
 if test "x$prefix" = "xNONE"
-then AC_MSG_ERROR([prefix is unset])
+then AC_MSG_ERROR([\$prefix is unset. Set with --prefix=\${install root directory}])
 fi
 
 # Checks for programs.
@@ -29,6 +28,5 @@ WR_check_prog(bash)
 WR_check_prog_options(find,gfind find)
 
 AC_CONFIG_FILES([Makefile], [chmod 444 Makefile])
-AC_CONFIG_FILES([stow.mk], [chmod 444 stow.mk])
 AC_SUBST([config_files],$ac_config_files)
 AC_OUTPUT

@@ -10,8 +10,10 @@ SHELL = bash -o pipefail -o errexit -o nounset
 SED = sed
 # autoconf apps
 autoreconf = autoreconf
-autoreconf_flags = 
 glibtoolize = glibtoolize
+
+# Use "autoreconf_flags=--force" to override cached values.
+autoreconf_flags = 
 
 all_files = \
   install-sh \

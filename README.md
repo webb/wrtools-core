@@ -1,5 +1,4 @@
-WRTools-Core
-=====
+# WR Tools: Core
 
 This package contains software supporting the development and execution of other
 tools.
@@ -204,7 +203,7 @@ If you've modified `configure.ac`, update things by running:
 $ make -f unconfigured.mk
 ```
 
-## Prerequisited
+## Prerequisites
 
 This requires packages:
 
