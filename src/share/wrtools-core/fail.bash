@@ -44,6 +44,27 @@ then
       done
       exit 1
   }
+
+  # CALL AS: fail_arg_unexpected "$OPTARG"
+  # CALL AS: fail_arg_unexpected help=true
+  fail_arg_unexpected () {
+      (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
+      fail "Option \"${1%%=*}\" has unexpected argument"
+  }
+      
+  # CALL AS: fail_arg_missing "$OPTARG"
+  # CALL AS: fail_arg_missing remote
+  fail_arg_missing () {
+      (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
+      fail "Option \"$1\" is missing required argument"
+  }
+
+  # CALL AS: fail_option_unknown "$OPTARG"
+  fail_option_unknown () {
+      (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
+      fail "Unknown option \"${1%%=*}\""
+  }
+      
       
 fi
 
