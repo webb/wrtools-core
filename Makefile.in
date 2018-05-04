@@ -12,7 +12,8 @@ SHELL = @bash@ -o pipefail -o errexit -o nounset
 
 #HELP:Build for @PACKAGE_NAME@ (@PACKAGE_TARNAME@)
 
-src_dir = @abs_srcdir@/src
+abs_srcdir = @abs_srcdir@
+src_dir = ${abs_srcdir}/src
 build_dir = @abs_builddir@/build
 prefix = @prefix@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
@@ -32,7 +33,7 @@ stow = stow
 
 config_files = @config_files@
 
-src_files_default := ${shell ${find} ${src_dir} -type f ! -name '*~'}
+src_files_default := ${shell ${find} ${src_dir} -type f ! -name '*~' ! -name '\#*\#' ! -name '\.\#*'}
 src_files = ${src_files_default}
 all_files = ${src_files:${src_dir}/%=${build_dir}/%}
 install_files = ${src_files:${src_dir}/%=${prefix}/%}
@@ -90,9 +91,10 @@ dist_name = ${dist_name_default}
 
 .PHONY: zip #   Create a zip archive
 zip:
-	${RM} -r ${build_dir}/${dist_name} ${build_dir}
-	${MAKE}
-	${MAKE} install prefix=${build_dir}/${dist_name}
+	${RM} -r ${build_dir}/${dist_name}
+	PATH="${build_dir}/${dist_name}:$$PATH" ${MAKE}
+	PATH="${build_dir}/${dist_name}:$$PATH" ${MAKE} install prefix=${build_dir}/${dist_name}
+	${RM} -f ${build_dir}/${dist_name}.zip
 	( cd ${build_dir} && ${zip} -9 -r ${dist_name}.zip ${dist_name} )
 
 #############################################################################
@@ -109,6 +111,12 @@ unstow:
 	${stow} -d ${prefix}/stow -t ${prefix} --delete --verbose --no-folding ${PACKAGE_TARNAME}
 	${MAKE} uninstall prefix=${prefix}/stow/${PACKAGE_TARNAME}
 	${RM} -r ${prefix}/stow/${PACKAGE_TARNAME}
+
+.PHONY: restow #   Unstow and then restow
+restow: 
+	${MAKE}
+	${MAKE} install prefix=${prefix}/stow/${PACKAGE_TARNAME}
+	${stow} -d ${prefix}/stow -t ${prefix} --restow --verbose --no-folding ${PACKAGE_TARNAME}
 
 #############################################################################
 # make help: this must be the last target
