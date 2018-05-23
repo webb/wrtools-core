@@ -1,0 +1,101 @@
+#!/bin/bash
+
+#HELP:COMMAND_NAME: Turn command-line arguments into XML
+
+set -o nounset -o errexit -o pipefail
+
+root_dir=$(dirname "$0")/..
+. "$root_dir"/share/wrtools-core/opt_help.bash
+. "$root_dir"/share/wrtools-core/opt_verbose.bash
+. "$root_dir"/share/wrtools-core/fail.bash
+. "$root_dir"/share/wrtools-core/temp.bash
+
+#HELP:Options:
+#HELP:  --help | -h: Print this help
+#HELP:  --keep-temps | -k: Don't delete temporary files
+#HELP:  --verbose, -v: Print additional diagnostics
+
+#HELP:  --namespace=$namespace | -n $namespace:  Set namespace for XML elements.
+#HELP:      Default is "https://example.org/list"
+namespace_default="https://example.org/list"
+unset namespace
+opt_namespace () {
+    (( $# == 1 )) || fail "$FUNCNAME expects 1 arg (got $#)"
+    [[ is-set != ${namespace+is-set} ]] || fail "option --namespace must be used only once"
+    (( ${#1} > 0 )) || fail "argument to option --namespace must not be empty"
+    namespace=$1
+}
+
+#HELP:  --document-element-name=$local-name | -d $local-name:  Set name of the
+#HELP:      document element (AKA root element). Default is "list"
+document_element_name_default="list"
+unset document_element_name
+opt_document_element_name () {
+    (( $# == 1 )) || fail "$FUNCNAME expects 1 arg (got $#)"
+    [[ is-set != ${document_element_name+is-set} ]] || fail "option --document-element-name must be used only once"
+    (( ${#1} > 0 )) || fail "argument to option --document-element-name must not be empty"
+    document_element_name=$1
+}
+
+#HELP:  --item-element-name=$local-name | -i $local-name:  Set name of elements for
+#HELP:      arguments.  Default is "item".
+item_element_name_default="item"
+unset item_element_name
+opt_item_element_name () {
+    (( $# == 1 )) || fail "$FUNCNAME expects 1 arg (got $#)"
+    [[ is-set != ${item_element_name+is-set} ]] || fail "option --item-element-name must be used only once"
+    (( ${#1} > 0 )) || fail "argument to option --item-element-name must not be empty"
+    item_element_name=$1
+}
+
+OPTIND=1
+while getopts :d:hi:kn:v-: option
+do case "$option" in
+       d ) opt_document_element_name "$OPTARG";;
+       h ) opt_help;;
+       i ) opt_item_element_name "$OPTARG";;
+       k ) opt_keep_temps;;
+       n ) opt_namespace "$OPTARG";;
+       v ) opt_verbose;;
+       - ) case "$OPTARG" in
+               document-element-name ) fail_arg_missing "$OPTARG";;
+               document-element-name=* ) opt_document_element_name "${OPTARG#*=}";;
+               help ) opt_help;;
+               help=* ) fail_arg_unexpected "$OPTARG";;
+               item-element-name ) fail_arg_missing "$OPTARG";;
+               item-element-name=* ) opt_line_element_name "${OPTARG#*=}";;
+               keep-temps ) opt_keep_temps;;
+               keep-temps=* ) fail_arg_unexpected "$OPTARG";;
+               namespace ) fail_arg_missing "$OPTARG";;
+               namespace=* ) opt_namespace "${OPTARG#*=}";;
+               verbose ) opt_verbose;;
+               verbose=* ) fail_arg_unexpected "$OPTARG";;
+               * ) fail_option_unknown "$OPTARG";;
+            esac;;
+        '?' ) fail_option_unknown "$OPTARG";;
+        : ) fail_arg_missing "$OPTARG";;
+        * ) fail_assert "Bad state in getopts (OPTARG=\"$OPTARG\")";;
+   esac
+done
+shift $((OPTIND-1))
+
+namespace=${namespace-${namespace_default}}
+document_element_name=${document_element_name-${document_element_name_default}}
+item_element_name=${item_element_name-${item_element_name_default}}
+
+cat <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<$document_element_name xmlns="$namespace">
+EOF
+
+while (( $# > 0 ))
+do
+    cat<<EOF
+<$item_element_name>$(sed -e "s/&/\&amp;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" -e "s/\"/\&quot;/g" -e "s/'/\&apos;/g" <<< "$1")</$item_element_name>
+EOF
+   shift
+done
+
+cat <<EOF
+</$document_element_name>
+EOF
