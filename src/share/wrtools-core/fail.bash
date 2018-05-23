@@ -59,12 +59,17 @@ then
       fail "Option \"$1\" is missing required argument"
   }
 
+  # CALL AS: fail_option_missing "$OPTARG"
+  fail_option_missing () {
+      (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
+      fail "Option \"$1\" is required but absent"
+  }
+
   # CALL AS: fail_option_unknown "$OPTARG"
   fail_option_unknown () {
       (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
       fail "Unknown option \"${1%%=*}\""
   }
-      
-      
+
 fi
 
