@@ -59,7 +59,8 @@ then
       fail "Option \"$1\" is missing required argument"
   }
 
-  # CALL AS: fail_option_missing "$OPTARG"
+  # CALL AS: fail_option_missing "$option"
+  # CALL AS: fail_option_missing --verbose
   fail_option_missing () {
       (( $# == 1 )) || fail_assert "$FUNCNAME requires 1 arg (got $#)"
       fail "Option \"$1\" is required but absent"
