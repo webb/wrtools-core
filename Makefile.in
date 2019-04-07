@@ -12,9 +12,8 @@ SHELL = @bash@ -o pipefail -o errexit -o nounset
 
 #HELP:Build for @PACKAGE_NAME@ (@PACKAGE_TARNAME@)
 
-abs_srcdir = @abs_srcdir@
-src_dir = ${abs_srcdir}/src
-build_dir = @abs_builddir@/build
+srcdir = @srcdir@
+builddir = @builddir@
 prefix = @prefix@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 
@@ -27,21 +26,13 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 SED = @SED@
 # other names
 find = @find@
-git = git
-zip = zip
-stow = stow
 
 config_files = @config_files@
 
-src_files_default := ${shell ${find} ${src_dir} -type f ! -name '*~' ! -name '\#*\#' ! -name '\.\#*'}
+src_files_default := ${shell ${find} ${srcdir}/src -type f ! -name '*~' ! -name '\#*\#' ! -name '\.\#*'}
 src_files = ${src_files_default}
-all_files = ${src_files:${src_dir}/%=${build_dir}/%}
-install_files = ${src_files:${src_dir}/%=${prefix}/%}
-
-# ensure share directory name matches package name
-ifneq (,${filter-out ${src_dir}/share/${PACKAGE_TARNAME}/%,${filter ${src_dir}/share/%,${src_files}}})
-${error Source share directory name does not match package name}
-endif
+all_files = ${src_files:${srcdir}/src/%=${builddir}/build/%}
+install_files = ${src_files:${srcdir}/src/%=${prefix}/%}
 
 #############################################################################
 #HELP:Default target is "all". Targets include:
@@ -61,62 +52,27 @@ uninstall:
 clean:
 	${RM} -r ${all_files}
 
-.PHONY: distclean #   Clean all products
+.PHONY: distclean #   Clean build & configure products
 distclean: clean
 	${RM} ${config_files} config.log config.status
 
 #############################################################################
 # all
 
-${build_dir}/%: ${src_dir}/%
+${builddir}/build/%: ${srcdir}/src/%
 	${MKDIR_P} ${dir $@}
 	${INSTALL_DATA} -- $< $@
 
 #############################################################################
 # install
 
-${prefix}/bin/%: ${build_dir}/bin/%
+${prefix}/bin/%: ${builddir}/build/bin/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_PROGRAM} -- $< $@
 
-${prefix}/%: ${build_dir}/%
+${prefix}/%: ${builddir}/build/%
 	@ ${MKDIR_P} -- ${dir $@}
 	${INSTALL_DATA} -- $< $@
-
-#############################################################################
-# zip
-
-dist_name_default := ${PACKAGE_TARNAME}-${shell ${git} describe --always --tags}
-dist_name = ${dist_name_default}
-
-.PHONY: zip #   Create a zip archive
-zip:
-	${RM} -r ${build_dir}/${dist_name}
-	PATH="${build_dir}/${dist_name}:$$PATH" ${MAKE}
-	PATH="${build_dir}/${dist_name}:$$PATH" ${MAKE} install prefix=${build_dir}/${dist_name}
-	${RM} -f ${build_dir}/${dist_name}.zip
-	( cd ${build_dir} && ${zip} -9 -r ${dist_name}.zip ${dist_name} )
-
-#############################################################################
-# stow
-
-.PHONY: stow #   Install using GNU Stow (via default "@prefix@/stow/@PACKAGE_TARNAME@")
-stow:
-	${MAKE}
-	${MAKE} install prefix=${prefix}/stow/${PACKAGE_TARNAME}
-	${stow} -d ${prefix}/stow -t ${prefix} --stow --verbose --no-folding ${PACKAGE_TARNAME}
-
-.PHONY: unstow #   Uninstall a GNU Stow installation
-unstow:
-	${stow} -d ${prefix}/stow -t ${prefix} --delete --verbose --no-folding ${PACKAGE_TARNAME}
-	${MAKE} uninstall prefix=${prefix}/stow/${PACKAGE_TARNAME}
-	${RM} -r ${prefix}/stow/${PACKAGE_TARNAME}
-
-.PHONY: restow #   Unstow and then restow
-restow: 
-	${MAKE}
-	${MAKE} install prefix=${prefix}/stow/${PACKAGE_TARNAME}
-	${stow} -d ${prefix}/stow -t ${prefix} --restow --verbose --no-folding ${PACKAGE_TARNAME}
 
 #############################################################################
 # make help: this must be the last target

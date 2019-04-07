@@ -588,6 +588,9 @@ PACKAGE_URL='https://github.com/webb/wrtools-core/'
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 config_files
+zip
+git
+stow
 find
 bash
 SED
@@ -2005,8 +2008,135 @@ fi
 done
 
   test "x$find" = "x" && as_fn_error $? "find not found" "$LINENO" 5
+# Extract the first word of "stow", so it can be a program name with args.
+set dummy stow; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_stow+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $stow in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_stow="$stow" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_stow="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_stow" && ac_cv_path_stow="stow"
+  ;;
+esac
+fi
+stow=$ac_cv_path_stow
+if test -n "$stow"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $stow" >&5
+$as_echo "$stow" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Extract the first word of "git", so it can be a program name with args.
+set dummy git; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_git+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $git in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_git="$git" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_git="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_git" && ac_cv_path_git="git"
+  ;;
+esac
+fi
+git=$ac_cv_path_git
+if test -n "$git"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $git" >&5
+$as_echo "$git" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Extract the first word of "zip", so it can be a program name with args.
+set dummy zip; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_zip+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $zip in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_zip="$zip" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_zip="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_zip" && ac_cv_path_zip="zip"
+  ;;
+esac
+fi
+zip=$ac_cv_path_zip
+if test -n "$zip"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $zip" >&5
+$as_echo "$zip" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 
 ac_config_files="$ac_config_files Makefile"
+
+ac_config_files="$ac_config_files stow.mk"
+
+ac_config_files="$ac_config_files zip.mk"
 
 config_files=$ac_config_files
 
@@ -2719,6 +2849,8 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "stow.mk") CONFIG_FILES="$CONFIG_FILES stow.mk" ;;
+    "zip.mk") CONFIG_FILES="$CONFIG_FILES zip.mk" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -3146,6 +3278,8 @@ which seems to be undefined.  Please make sure it is defined" >&2;}
 
   case $ac_file$ac_mode in
     "Makefile":F) chmod 444 Makefile ;;
+    "stow.mk":F) chmod 444 stow.mk ;;
+    "zip.mk":F) chmod 444 zip.mk ;;
 
   esac
 done # for ac_tag

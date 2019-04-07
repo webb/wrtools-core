@@ -26,7 +26,12 @@ AC_DEFUN([WR_check_prog_options],[AC_PATH_PROGS($1,$2)
 
 WR_check_prog(bash)
 WR_check_prog_options(find,gfind find)
+AC_PATH_PROG([stow],[stow],[stow])
+AC_PATH_PROG([git],[git],[git])
+AC_PATH_PROG([zip],[zip],[zip])
 
 AC_CONFIG_FILES([Makefile], [chmod 444 Makefile])
+AC_CONFIG_FILES([stow.mk], [chmod 444 stow.mk])
+AC_CONFIG_FILES([zip.mk], [chmod 444 zip.mk])
 AC_SUBST([config_files],$ac_config_files)
 AC_OUTPUT
