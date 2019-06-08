@@ -21,8 +21,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 # autoconf names
 MKDIR_P = @MKDIR_P@
 INSTALL = @INSTALL@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+install_data_mode := ${shell printf '%o' $$(( ( $$(umask) ^ 0777 ) & 0666 ))}
+install_data_readonly_mode := ${shell printf '%o' $$(( ( $$(umask) ^ 0777 ) & 0444 ))}
+install_bin_readonly_mode := ${shell printf '%o' $$(( ( $$(umask) ^ 0777 ) & 0555 ))}
 SED = @SED@
 # other names
 find = @find@
@@ -61,18 +62,18 @@ distclean: clean
 
 ${builddir}/build/%: ${srcdir}/src/%
 	${MKDIR_P} ${dir $@}
-	${INSTALL_DATA} -- $< $@
+	${INSTALL} -m ${install_data_mode} -- $< $@
 
 #############################################################################
 # install
 
 ${prefix}/bin/%: ${builddir}/build/bin/%
 	@ ${MKDIR_P} -- ${dir $@}
-	${INSTALL_PROGRAM} -- $< $@
+	${INSTALL} -m ${install_bin_readonly_mode} -- $< $@
 
 ${prefix}/%: ${builddir}/build/%
 	@ ${MKDIR_P} -- ${dir $@}
-	${INSTALL_DATA} -- $< $@
+	${INSTALL} -m ${install_data_readonly_mode} -- $< $@
 
 #############################################################################
 # make help: this must be the last target
