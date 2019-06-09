@@ -54,7 +54,8 @@ uninstall:
 
 .PHONY: clean #   Clean build products
 clean:
-	${RM} -r ${all_files}
+	${RM} ${all_files}
+	${RM} -r ${builddir}/build
 
 .PHONY: distclean #   Clean build & configure products
 distclean: clean
