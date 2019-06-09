@@ -23,7 +23,7 @@ install:
 
 .PHONY: uninstall #   Uninstall using GNU Stow
 uninstall:
-	${stow} -d ${prefix}/stow -t ${prefix} --delete --verbose --no-folding ${PACKAGE_TARNAME}
+	- ${stow} -d ${prefix}/stow -t ${prefix} --delete --verbose --no-folding ${PACKAGE_TARNAME}
 	${MAKE} uninstall prefix=${prefix}/stow/${PACKAGE_TARNAME}
 	${RM} -r ${prefix}/stow/${PACKAGE_TARNAME}
 
