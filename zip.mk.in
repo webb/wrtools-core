@@ -8,6 +8,7 @@ prefix = @prefix@
 abs_srcdir = @abs_srcdir@
 abs_builddir = @abs_builddir@
 
+MKDIR_P = @MKDIR_P@
 SED = @SED@
 git = @git@
 zip = @zip@
@@ -24,7 +25,7 @@ dist_name = ${dist_name_default}
 .PHONY: zip #   Create a zip archive
 zip:
 	${RM} -r ${abs_builddir}/build/zip
-	${git} -C ${abs_srcdir} submodule foreach 'PATH="${abs_builddir}/build/zip/${dist_name}/bin:$$PATH" ${MAKE} -C ${abs_builddir} zip.mk zip-package dist_name=${dist_name} zip_package_source=$$PWD zip_package_build=${abs_builddir}/build/zip/$$path zip_package_prefix=${abs_builddir}/build/zip/${dist_name}'
+	${git} -C ${abs_srcdir} submodule foreach 'PATH="${abs_builddir}/build/zip/${dist_name}/bin:$$PATH" ${MAKE} -C ${abs_builddir} -f zip.mk zip-package dist_name=${dist_name} zip_package_source=$$PWD zip_package_build=${abs_builddir}/build/zip/$$path zip_package_prefix=${abs_builddir}/build/zip/${dist_name}'
 	PATH="${abs_builddir}/build/zip/${dist_name}:$$PATH" ${MAKE}
 	PATH="${abs_builddir}/build/zip/${dist_name}:$$PATH" ${MAKE} install prefix=${abs_builddir}/build/zip/${dist_name}
 	${RM} -f ${abs_builddir}/build/zip/${dist_name}.zip
