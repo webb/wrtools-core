@@ -30,7 +30,7 @@ then
   #HELP:  --keep-temps | -k: Don't delete temporary files
   # k ) opt_keep_temps;;
   # keep-temps ) opt_keep_temps;;
-  # keep-temps=* ) fail "No argument expected for long option \"${OPTARG%%=*}\"";;
+  # keep-temps=* ) fail_arg_unexpected "$OPTARG";;
   opt_keep_temps () {
       # we don't initialize this variable, because we want
       # temporary-file-keeping to propagate into subprocesses
@@ -53,6 +53,22 @@ then
           WRTOOLS_TEMP_FILES+=("$PATHNAME")
           vecho "$FUNCNAME(): $VAR=\"$PATHNAME\""
       done
+  }
+
+  # call like...
+  #   temp_make_file_with_suffix variable-name suffix
+  # e.g. ...
+  #   temp_make_file_with_suffix IMAGE .jpg
+  # ... and it'll make a temp file with the given suffix, and set a variable
+  # with the given name to the path of the temp file.
+  temp_make_file_with_suffix () {
+      local VAR=$1
+      local PATHNAME="$(umask 077; mktemp --suffix="$2" "$WRTOOLS_TEMP_DIR"/tmp."$VAR".XXXXXX)"
+      printf -v "$VAR" "%s" "$PATHNAME"
+      # Append here; don't reset it, since this may be called multiple times.
+      WRTOOLS_TEMP_FILE_VARS+=("$VAR")
+      WRTOOLS_TEMP_FILES+=("$PATHNAME")
+      vecho "$FUNCNAME(): $VAR=\"$PATHNAME\""
   }
 
   WRTOOLS_TEMP_DIRS=()
