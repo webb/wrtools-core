@@ -30,6 +30,20 @@ then
   print_fail () {
       printf "%s: Error: %s\n" "$(get_command_path_short)" "$*" >&2
   }
+
+  # Call fail_later to provide an error message and set an error condition.
+  # Call maybe_fail_now to quit if there has been an error.
+  unset WRTOOLS_FAIL_BASH_FAILED
+  fail_later () {
+      printf "%s: Error: %s\n" "$(get_command_path_short)" "$*" >&2
+      WRTOOLS_FAIL_BASH_FAILED=true
+  }
+      
+  maybe_fail_now () {
+      if [[ ${WRTOOLS_FAIL_BASH_FAILED+is-set} = is-set ]]
+      then exit 1
+      fi
+  }
   
   warn () {
       printf "%s: Warning: %s\n" "$(get_command_path_short)" "$*" >&2
