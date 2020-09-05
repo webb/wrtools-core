@@ -14,14 +14,14 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # recommended help:
-#HELP:  --verbose, -v: Print additional diagnostics
+#HELP:  --verbose | -v: Print additional diagnostics
 
 # getopts pieces:
 #while getopts :v-: option
 #       v ) opt_verbose;;
 #       - ) case "$OPTARG" in
 #               verbose ) opt_verbose;;
-#               verbose=* ) fail "Long option \"${OPTARG%%=*}\" has unexpected argument";;
+#               verbose=* ) fail_arg_unexpected "$OPTARG";;
 
 # if you want to turn on verbose before the script even gets started, do:
 #    WRTOOLS_OPT_VERBOSE_IS_VERBOSE=true command ...
@@ -51,6 +51,12 @@ then
   vecho () {
       if is_verbose
       then printf "# %s: %s\n" "$(get_command_path_short)" "$*" >&2
+      fi
+  }
+
+  vprintf () {
+      if is_verbose
+      then printf "# %s: $1\n" "$(get_command_path_short)" "${@:2}" >&2
       fi
   }
 
