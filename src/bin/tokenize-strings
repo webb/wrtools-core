@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#HELP:COMMAND_NAME: convert a set of strings into tokenized values, one per line
+#HELP:COMMAND_NAME: convert strings into tokenized values, with a provided separator
 #HELP:Usage: COMMAND_NAME $string1 $string2 ...
 
 set -o nounset -o errexit
@@ -52,27 +52,40 @@ opt_output_separator () {
 }
 
 #HELP:  --output-null | -0: on output, separate tokens by NULL (\0)
+#HELP:      Implies --terminate
 unset output_null
 opt_output_null () {
     [[ ${output_separator+is-set} != is-set ]] || fail "Only one of options --output-null and --output-separator may be used."
     [[ ${output_null+is-set} != is-set ]] || fail "Option --output-null may be used only once."
     (( $# == 0 )) || fail "function $FUNCNAME requires 0 args (got $#)"
     output_null=true
+    opt_terminate
+}
+
+#HELP:  --terminate | -t: also terminate result
+unset terminate
+opt_terminate () {
+    [[ ${terminate-false} != true ]] || fail "option --terminate may only occur once" 
+    (( $# == 0 )) || fail "function $FUNCNAME requires 0 args (got $#)"
+    terminate=true
 }
 
 OPTIND=1
-while getopts :0hi:o:v-: option
+while getopts :0hi:o:tv-: option
 do case "$option" in
        0 ) opt_output_null;;
        h ) opt_help;;
        i ) opt_input_separator "$OPTARG";;
        o ) opt_output_separator "$OPTARG";;
+       t ) opt_terminate;;
        v ) opt_verbose;;
        - ) case "$OPTARG" in
                help ) opt_help;;
                input-separator=* ) opt_input_separator "${OPTARG#*=}";;
                output-separator=* ) opt_output_separator "${OPTARG#*=}";;
                output-null ) opt_output_null;;
+               terminate ) opt_terminate;;
+               terminate=* ) fail_arg_unexpected "$OPTARG";;
                verbose ) opt_verbose;;
                help=* \
                  | output-null=* \
@@ -120,7 +133,10 @@ do if [[ $input_separator = "" ]]
    fi
 done
 
-if [[ $has_printed = true && ${output_null+is-set} = is-set ]]
+if [[ $has_printed = true && ${terminate-} = true ]]
 then
-  printf '\0'
+  if [[ ${output_null+is-set} = is-set ]]
+  then printf '\0'
+  else printf "%s" "$output_separator"
+  fi
 fi
