@@ -46,16 +46,16 @@ default_output_separator=$'\n'
 unset output_separator
 opt_output_separator () {
     [[ ${output_separator+is-set} != is-set ]] || fail "option --output-separator may be used only once" 
-    [[ $output_null = false ]] || fail "Only one of options --output-null and --input-separator may be used."
+    [[ ${output_null+is-set} != is-set ]] || fail "Only one of options --output-null and --output-separator may be used."
     (( $# == 1 )) || fail "function $FUNCNAME requires 1 arg (got $#)"
     output_separator="$1"
 }
 
 #HELP:  --output-null | -0: on output, separate tokens by NULL (\0)
-output_null=false
+unset output_null
 opt_output_null () {
-    [[ ${output_separator+is-set} != is-set ]] || fail "Only one of options --output-null and --input-separator may be used."
-    [[ $output_null = false ]] || fail "Option --output-null may be used only once."
+    [[ ${output_separator+is-set} != is-set ]] || fail "Only one of options --output-null and --output-separator may be used."
+    [[ ${output_null+is-set} != is-set ]] || fail "Option --output-null may be used only once."
     (( $# == 0 )) || fail "function $FUNCNAME requires 0 args (got $#)"
     output_null=true
 }
@@ -89,12 +89,12 @@ done
 shift $((OPTIND-1))
 
 if [[ ${input_separator+is-set} != is-set ]]
-then vecho Using default input separator
+then vecho "Using default input separator: don't tokenize input"
      input_separator=$default_input_separator
 fi
 
-if [[ ${output_separator+is-set} != is-set ]]
-then vecho Using default output separator
+if [[ ${output_separator+is-set} != is-set && ${output_null+is-set} != is-set ]]
+then vecho "Using default output separator: newline"
      output_separator=$default_output_separator
 fi
 
@@ -102,7 +102,7 @@ has_printed=false
 print_separated () {
     (( $# == 1 )) || fail "$FUNCNAME must have 1 arg"
     if [[ $has_printed = true ]]
-    then if [[ $output_null = true ]]
+    then if [[ ${output_null+is-set} = is-set ]]
          then printf '\0'
          else printf "%s" "$output_separator"
          fi
@@ -119,3 +119,8 @@ do if [[ $input_separator = "" ]]
         done <<< "$string$input_separator"
    fi
 done
+
+if [[ $has_printed = true && ${output_null+is-set} = is-set ]]
+then
+  printf '\0'
+fi
