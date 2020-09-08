@@ -195,18 +195,37 @@ do_thing_two () { cat /etc/hosts; }
 add_exit_hook do_thing_one do_thing_two
 ```
 
+# Building
+
+```
+$ ./configure
+$ make
+```
+
+Then either
+
+```
+$ make install
+```
+
+or 
+
+```
+$ make -f stow.mk install
+```
+
+
 # Updating the package
 
 If you've modified `configure.ac`, update things by running:
 
-```bash
+```
 $ make -f unconfigured.mk
 ```
-
-## Prerequisites
 
 This requires packages:
 
 * autoconf
 * automake
 
+ 
