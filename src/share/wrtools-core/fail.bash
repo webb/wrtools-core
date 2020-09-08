@@ -31,8 +31,11 @@ then
       printf "%s: Error: %s\n" "$(get_command_path_short)" "$*" >&2
   }
 
-  # Call fail_later to provide an error message and set an error condition.
-  # Call maybe_fail_now to quit if there has been an error.
+  # fail_later() and maybe_fail_now(): aggregate multiple possible errors before failing
+  # - fail_later(): call like you call fail(): provide an error message and set an error condition.
+  # - maybe_fail_now(): quits if there was error earlier.
+  # Good for making several checks, with diagnostics, before quitting.
+  
   unset WRTOOLS_FAIL_BASH_FAILED
   fail_later () {
       printf "%s: Error: %s\n" "$(get_command_path_short)" "$*" >&2
@@ -40,6 +43,7 @@ then
   }
       
   maybe_fail_now () {
+      (( $# == 0 )) || fail_assert "$FUNCNAME requires 0 args (got $#)"
       if [[ ${WRTOOLS_FAIL_BASH_FAILED+is-set} = is-set ]]
       then exit 1
       fi
